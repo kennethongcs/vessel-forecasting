@@ -4,7 +4,10 @@
   "description": "# basic-node-bootcamp",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "db:create": "psql -d vessel_forecast -f tables_init.sql",
+    "db:drop": "psql -d vessel_forecast -f tables_drop.sql",
+    "db:seed": "psql -d vessel_forecast -f tables_seed.sql"
   },
   "repository": {
     "type": "git",
@@ -18,7 +21,15 @@
     "url": "https://github.com/rocketacademy/base-node-bootcamp/issues"
   },
   "homepage": "https://github.com/rocketacademy/base-node-bootcamp#readme",
-  "dependencies": {},
+  "dependencies": {
+    "cookie-parser": "^1.4.6",
+    "ejs": "^3.1.6",
+    "express": "^4.17.3",
+    "jssha": "^3.2.0",
+    "method-override": "^3.0.0",
+    "multer": "^1.4.4",
+    "pg": "^8.7.3"
+  },
   "devDependencies": {
     "eslint": "^7.12.1",
     "eslint-config-airbnb-base": "^14.2.0",
