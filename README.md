@@ -12,7 +12,7 @@ Problem Statement:
 
 User Stories:
 
-ERD: https://github.com/kennethongcs/base-node-bootcamp/blob/vessel-forecasting/Vessel%20ERD.pdf
+ERD: https://github.com/kennethongcs/base-node-bootcamp/blob/vessel-forecasting/Vessel%20Forecasting.pdf
 
 Userflow: https://github.com/kennethongcs/base-node-bootcamp/blob/vessel-forecasting/Flowchart.pdf
 
