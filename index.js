@@ -31,6 +31,12 @@ const multerUpload = multer({ dest: 'uploads/' });
 
 app.listen(3004);
 
+// index page
 app.get('/', (req, res) => {
   res.render('main');
+});
+
+// login page
+app.get('/login', (req, res) => {
+  res.render('login');
 });
