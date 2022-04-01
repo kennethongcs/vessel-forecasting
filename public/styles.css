@@ -9,6 +9,10 @@ body {
   margin-right: 25px; */
 }
 
+.form-container {
+  border: 1px solid black;
+}
+
 .jumbotron-color {
   background-color: #5bccf6;
 }
