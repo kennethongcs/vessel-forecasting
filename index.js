@@ -8,7 +8,7 @@ import multer from 'multer';
 const pgConnectionConfigs = {
   user: 'kennethongcs',
   host: 'localhost',
-  database: 'ra',
+  database: 'vessel-forecasting',
   port: 5432,
 };
 
