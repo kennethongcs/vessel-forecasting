@@ -1,4 +1,4 @@
-INSERT INTO accounts (user_name, password, origin_country, super_user) VALUES ('admin', 12345, 1, 1);
+INSERT INTO accounts (user_name, password, origin_country, super_user) VALUES ('admin', '3627909a29c31381a071ec27f7c9ca97726182aed29a7ddd2e54353322cfb30abb9e3a6df2ac2c20fe23436311d678564d0c8d305930575f60e2d3d048184d79', 1, 1);
 
 INSERT INTO country (country_name) VALUES ('Singapore');
 INSERT INTO country (country_name) VALUES ('Malaysia');
