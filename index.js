@@ -30,24 +30,49 @@ app.use(methodOverride('_method'));
 app.use(cookieParser());
 // set the name of the upload directory here
 const multerUpload = multer({ dest: 'uploads/' });
-// custom middleware to verify hash DOING add to helper function file
-const checkAuth = (req, res, next) => {
+
+// check if user is logged in and passes it into a cookie
+app.use((req, res, next) => {
   // set the default value
   req.isUserLoggedIn = false;
 
   // check to see if the cookies you need exists
-  if (req.cookies.loggedIn && req.cookies.userId) {
+  if (req.cookies.userId && req.cookies.sessionId) {
     // get the hased value that should be inside the cookie
-    const hash = getHash(req.cookies.userId);
+    const hash = getHashSalted(req.cookies.userId);
 
     // test the value of the cookie
-    if (req.cookies.loggedIn === hash) {
+    if (req.cookies.sessionId === hash) {
       req.isUserLoggedIn = true;
+
+      // look for this user in the database
+      const values = [req.cookies.userId];
+
+      // try to get the user
+      pool.query(
+        'SELECT * FROM accounts WHERE user_name=$1',
+        values,
+        (error, result) => {
+          if (error || result.rows.length < 1) {
+            res.status(503).send('Check with admin');
+            return;
+          }
+          // set the user as a key in the req object so that it's accessible in the route
+          req.user = result.rows[0];
+          next();
+        }
+      );
+      // make sure we don't get down to the next() below
+      return;
     }
   }
-
   next();
-};
+});
+// set 'user' so it can be retrieved in every view
+app.use((req, res, next) => {
+  res.locals.user = req.cookies.userId;
+  next();
+});
 
 app.listen(3004);
 
@@ -59,7 +84,8 @@ app.get('/', (req, res) => {
 // login page
 app.get('/login', (req, res) => {
   // if user already logged in, redirect to index '/'
-  res.render('login');
+  res.render('loginForm');
+
   // TODO
   // if not logged in then show this page, else don't show login button and redirect from login page
 });
@@ -101,8 +127,5 @@ app.post('/login', (req, res) => {
 app.get('/logout', (req, res) => {
   res.clearCookie('userId');
   res.clearCookie('sessionId');
-  // res.send(
-  //   'Successfully logged out, Click <a href="/">here</a> to head back to the homepage'
-  // );
   res.render('logout');
 });
