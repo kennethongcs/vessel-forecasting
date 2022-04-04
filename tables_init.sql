@@ -47,6 +47,7 @@ CREATE TABLE IF NOT EXISTS vessel_voyage (
     id SERIAL NOT NULL PRIMARY KEY,
     vessel_name INTEGER,
     voyage_number TEXT,
+    country_name INTEGER,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
  );
 
