@@ -111,7 +111,7 @@ app.post('/login', (req, res) => {
         // hash session ID
         const saltedUserId = getHashSalted(userId);
         res.cookie('sessionId', saltedUserId);
-        res.send('Logged in.');
+        res.render('login-transfer-page');
         console.log(`Logged in user: ${userId}`);
       } else {
         res.status(403).send('Sorry user/pass is wrong.');
