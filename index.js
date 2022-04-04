@@ -59,6 +59,8 @@ app.use((req, res, next) => {
           }
           // set the user as a key in the req object so that it's accessible in the route
           req.user = result.rows[0];
+          // remove password from user
+          delete req.user.password;
           next();
         }
       );
@@ -70,15 +72,24 @@ app.use((req, res, next) => {
 });
 // set 'user' so it can be retrieved in every view
 app.use((req, res, next) => {
-  res.locals.user = req.cookies.userId;
+  res.locals.user = req.user;
   next();
 });
 
 app.listen(3004);
 
-// index page
+// index page DOING
 app.get('/', (req, res) => {
-  res.render('main');
+  // check if user is logged in, else redirect to login page
+  if (!req.isUserLoggedIn) {
+    res.redirect('login');
+    return;
+  }
+  // check if user is a super user
+  if (req.user.super_user === 1) {
+    const userData = req.user;
+    res.render('index', userData);
+  }
 });
 
 // login page
@@ -128,4 +139,25 @@ app.get('/logout', (req, res) => {
   res.clearCookie('userId');
   res.clearCookie('sessionId');
   res.render('logout');
+});
+
+// GET shows available vessels
+app.get('/vessels', (req, res) => {
+  // query list of vessels
+  const queryVessels = 'SELECT * FROM vessel_name';
+  pool
+    .query(queryVessels)
+    .then((result) => {
+      const data = result.rows;
+      res.render('vessel-list', { data });
+    })
+    .catch((err) => {
+      console.log('Vessel get error: ', err);
+      res.status(500).send('Please contact administrator');
+    });
+});
+
+// GET shows vessel and form to input vessel's voyage
+app.get('/vessel-voyage', (req, res) => {
+  //
 });
