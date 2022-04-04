@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "db:create": "psql -d vessel_forecast -f tables_init.sql",
+    "db:init": "psql -d vessel_forecast -f tables_init.sql",
     "db:drop": "psql -d vessel_forecast -f tables_drop.sql",
     "db:seed": "psql -d vessel_forecast -f tables_seed.sql"
   },
