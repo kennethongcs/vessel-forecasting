@@ -11,18 +11,32 @@
   <body>
     <!-- login form -->
     <main class="container">
-      <div class="form-container mx-auto mt-4" style="width: 500px">
+      <div
+        class="form-container mx-auto mt-5 justify-content-center"
+        style="width: 400px; height: 200px"
+      >
         <form action="/login" method="POST" class="">
-          <div class="form-group form-inline">
-            <label for="username" class="">Username</label>
+          <div class="form-group form-inline justify-content-center mt-4">
+            <label for="username" class="mr-2">Username:</label>
             <input
               type="text"
               id="username"
               name="username"
-              class="form-control w-50"
+              class="form-control h-50"
             />
           </div>
-          <div></div>
+          <div class="form-group form-inline justify-content-center">
+            <label for="password" class="mr-2">Password:</label>
+            <input
+              type="password"
+              id="password"
+              name="password"
+              class="form-control h-50"
+            />
+          </div>
+          <div class="text-center">
+            <input type="submit" value="Submit" class="btn btn-success mt-3" />
+          </div>
         </form>
       </div>
     </main>
