@@ -35,7 +35,6 @@ const multerUpload = multer({ dest: 'uploads/' });
 app.use((req, res, next) => {
   // set the default value
   req.isUserLoggedIn = false;
-
   // check to see if the cookies you need exists
   if (req.cookies.userId && req.cookies.sessionId) {
     // get the hased value that should be inside the cookie
@@ -76,17 +75,19 @@ app.use((req, res, next) => {
   next();
 });
 
-app.listen(3004);
+app.listen(3004, () => {
+  console.log('Server is up.');
+});
 
 // index page DOING
 app.get('/', (req, res) => {
-  // check if user is logged in, else redirect to login page
+  // if user is not logged in redirect to login page
   if (!req.isUserLoggedIn) {
-    res.redirect('login');
+    res.render('loginForm');
     return;
   }
-  // check if user is a super user
-  if (req.user.super_user === 1) {
+  // if user is logged in, redirect to index
+  if (req.isUserLoggedIn) {
     const userData = req.user;
     res.render('index', userData);
   }
