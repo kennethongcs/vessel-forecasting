@@ -1,3 +1,4 @@
+/* eslint-disable spaced-comment */
 import express, { urlencoded } from 'express';
 import pg from 'pg';
 import methodOverride from 'method-override';
@@ -76,7 +77,7 @@ app.use((req, res, next) => {
 });
 
 app.listen(3004, () => {
-  console.log('Server is up.');
+  console.log('Server is up, listening on port 3004.');
 });
 
 // index page DOING
@@ -158,7 +159,31 @@ app.get('/vessels', (req, res) => {
     });
 });
 
-// GET shows vessel and form to input vessel's voyage
-app.get('/vessel-voyage', (req, res) => {
-  //
+/////////////////
+// ADMIN PANEL // DOING
+/////////////////
+
+// GET shows admin panel
+app.get('/admin', (req, res) => {
+  // verify if user has super user rights
+  if (req.user.super_user) {
+    const userData = req.user;
+    // show admin ejs
+    res.render('admin', userData);
+  } else {
+    const userData = req.user;
+    res.render('index', userData);
+  }
+});
+// GET shows
+app.get('/vessel-voyage-creation', (req, res) => {
+  // verify if user has super user rights
+  if (req.user.super_user) {
+    const userData = req.user;
+    // show admin ejs
+    res.render('vessel-voyage-creation-form', userData);
+  } else {
+    const userData = req.user;
+    res.render('index', userData);
+  }
 });
