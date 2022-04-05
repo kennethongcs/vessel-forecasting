@@ -98,7 +98,6 @@ app.get('/', (req, res) => {
 app.get('/login', (req, res) => {
   // if user already logged in, redirect to index '/'
   res.render('loginForm');
-
   // TODO
   // if not logged in then show this page, else don't show login button and redirect from login page
 });
@@ -145,6 +144,11 @@ app.get('/logout', (req, res) => {
 
 // GET shows available vessels
 app.get('/vessels', (req, res) => {
+  // check if user is logged in
+  if (!req.isUserLoggedIn) {
+    res.render('loginForm');
+    return;
+  }
   // query list of vessels
   const queryVessels = 'SELECT * FROM vessel_name';
   pool
@@ -167,23 +171,32 @@ app.get('/vessels', (req, res) => {
 app.get('/admin', (req, res) => {
   // verify if user has super user rights
   if (req.user.super_user) {
-    const userData = req.user;
     // show admin ejs
-    res.render('admin', userData);
+    res.render('admin');
   } else {
-    const userData = req.user;
-    res.render('index', userData);
+    res.render('index');
   }
 });
-// GET shows
+// GET shows form to create new vessel / voyage
+// GET shows current vessels in DB
 app.get('/vessel-voyage-creation', (req, res) => {
   // verify if user has super user rights
   if (req.user.super_user) {
-    const userData = req.user;
     // show admin ejs
-    res.render('vessel-voyage-creation-form', userData);
+    res.render('vessel-voyage-creation-form');
   } else {
-    const userData = req.user;
-    res.render('index', userData);
+    res.render('index');
   }
+});
+// POST for vessel-voyage-creation form
+// adds new vessel / voyage into DB
+app.post('/vessel-voyage-creation', (req, res) => {
+  // retrieve data from form input
+  const data = req.body;
+  // convert text to upper case
+  data.vessel_name = data.vessel_name.toUpperCase();
+  // check if vessel exists
+  // if does not, then create new vessel & return id
+  // if exist, do not overwrite & return id
+  const vslCreationQuery = 'INSERT INTO vessel_name';
 });
