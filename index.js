@@ -76,7 +76,7 @@ app.use((req, res, next) => {
   next();
 });
 
-const port = 3015;
+const port = 3004;
 
 app.listen(port, () => {
   console.log(`Server is up, listening on port ${port}.`);
@@ -181,24 +181,43 @@ app.get('/admin', (req, res) => {
 });
 // GET shows form to create new vessel / voyage
 // GET shows current vessels in DB
-app.get('/vessel-voyage-creation', (req, res) => {
+app.get('/voyage-creation', (req, res) => {
   // verify if user has super user rights
   if (req.user.super_user) {
     // show admin ejs
-    res.render('vessel-voyage-creation-form');
+    const vesselNameQuery = 'SELECT * FROM vessel_name';
+    pool
+      .query(vesselNameQuery)
+      .then((result) => {
+        const data = result.rows;
+        res.render('voyage-creation-form', { data });
+      })
+      .catch((err) => {
+        console.log('Error getting voyage:', err);
+        res.status(500).send('Server error.');
+      });
   } else {
     res.render('index');
   }
 });
 // POST for vessel-voyage-creation form
-// adds new vessel / voyage into DB
-app.post('/vessel-voyage-creation', (req, res) => {
+// adds new voyage into DB
+app.post('/voyage-creation', (req, res) => {
   // retrieve data from form input
   const data = req.body;
   // convert text to upper case
   data.vessel_name = data.vessel_name.toUpperCase();
-  // check if vessel exists
-  // if does not, then create new vessel & return id
-  // if exist, do not overwrite & return id
-  const vslCreationQuery = 'INSERT INTO vessel_name';
+  const formData = [data.vessel_name, data.vessel_voyage];
+  // query to add data into vessel_voyage table
+  const voyageAddQuery =
+    'INSERT INTO vessel_voyage(vessel_name, voyage_number) VALUES($1, $2)';
+  pool
+    .query(voyageAddQuery, formData)
+    .then((result) => {
+      console.log('Added voyage successfully');
+    })
+    .catch((err) => {
+      console.log('Posting error: ', err);
+      res.status(500).send('Server error. Please check with administrator');
+    });
 });
