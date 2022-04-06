@@ -76,8 +76,10 @@ app.use((req, res, next) => {
   next();
 });
 
-app.listen(3004, () => {
-  console.log('Server is up, listening on port 3004.');
+const port = 3015;
+
+app.listen(port, () => {
+  console.log(`Server is up, listening on port ${port}.`);
 });
 
 // index page DOING
