@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+  <%- include('partials/header', {title: 'Voyage Creation'}) %>
+  <body>
+    <main class="container mt-4">
+      <div class="row">
+        <!-- form to insert new vsl/voy -->
+        <div
+          class="col-6 border-right border-dark form-container"
+          style="min-height: 500px"
+        >
+          <p class="font-weight-bold">Add new voyage after selecting vessel:</p>
+          <form action="/voyage-creation" method="POST">
+            <label for="vessel_name">Vessel Name: </label>
+            <select name="vessel_name" id="vessel_name" class="form-control">
+              <% data.forEach(element => { %>
+              <option value="<%= element.id %>">
+                <%= element.vessel_name %>
+              </option>
+              <% }) %>
+            </select>
+            <label for="voyage_number">Voyage Number:</label>
+            <input
+              type="number"
+              id="voyage_number"
+              name="voyage_number"
+              class="form-control"
+              placeholder="eg. 100"
+            />
+            <input type="submit" value="Submit" class="btn btn-success mt-4" />
+          </form>
+        </div>
+        <!-- shows current vsl voy -->
+        <div class="col-6">
+          <p class="font-weight-bold">Display Current Vessels / Voyages:</p>
+        </div>
+      </div>
+    </main>
+  </body>
+</html>
