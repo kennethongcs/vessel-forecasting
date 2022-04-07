@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+  <%- include('partials/header', {title: 'Vessel Edit Form'}) %>
+  <body>
+    <main class="container mt-4">
+      <form
+        action="/vessel-creation/<%= data.id %> ?_method=PUT"
+        method="POST"
+        class="form-group"
+      >
+        <label for="vessel_name">Vessel Name:</label>
+        <input
+          type="vessel_name"
+          name="vessel_name"
+          id="vessel_name"
+          value="<%= data.vessel_name %>"
+          class="form-control"
+        />
+        <label for="teu">TEUs:</label>
+        <input
+          type="text"
+          name="teu"
+          id="teu"
+          value="<%= data.teu %>"
+          class="form-control"
+        />
+        <label for="tons">Tons:</label>
+        <input
+          type="text"
+          name="tons"
+          id="tons"
+          value="<%= data.tons %>"
+          class="form-control"
+        />
+        <input type="submit" value="Submit" class="btn btn-success mt-4" />
+      </form>
+    </main>
+  </body>
+</html>
