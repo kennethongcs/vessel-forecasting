@@ -166,9 +166,12 @@ app.get('/vessels', (req, res) => {
 });
 
 /////////////////
-// ADMIN PANEL // DOING
+// ADMIN PANEL //
 /////////////////
 
+////////////
+// voyage //
+////////////
 // GET shows admin panel
 app.get('/admin', (req, res) => {
   // verify if user has super user rights
@@ -176,7 +179,7 @@ app.get('/admin', (req, res) => {
     // show admin ejs
     res.render('admin');
   } else {
-    res.render('index');
+    res.redirect('/');
   }
 });
 // GET shows form to create new vessel / voyage
@@ -184,13 +187,23 @@ app.get('/admin', (req, res) => {
 app.get('/voyage-creation', (req, res) => {
   // verify if user has super user rights
   if (req.user.super_user) {
+    let data;
     // show admin ejs
-    const vesselNameQuery =
-      'SELECT vessel_name.id, vessel_name.vessel_name, vessel_voyage.voyage_number FROM vessel_name INNER JOIN vessel_voyage ON vessel_name.id = vessel_voyage.vessel_name';
+    const vesselNameQuery = 'SELECT * FROM vessel_name';
     pool
       .query(vesselNameQuery)
       .then((result) => {
-        const data = result.rows;
+        // add all vessel name into obj
+        data = {
+          name: result.rows,
+        };
+        const vesselVoyageQuery =
+          'SELECT vessel_voyage.id, vessel_name.id AS vessel_name_id, vessel_name.vessel_name, vessel_voyage.voyage_number FROM vessel_name INNER JOIN vessel_voyage ON vessel_name.id = vessel_voyage.vessel_name';
+        return pool.query(vesselVoyageQuery);
+      })
+      .then((result) => {
+        // add all vessel voy into obj
+        data.voyage = result.rows;
         res.render('voyage-creation-form', { data });
       })
       .catch((err) => {
@@ -198,7 +211,7 @@ app.get('/voyage-creation', (req, res) => {
         res.status(500).send('Server error.');
       });
   } else {
-    res.render('index');
+    res.redirect('/');
   }
 });
 // POST for vessel-voyage-creation form
@@ -206,6 +219,7 @@ app.get('/voyage-creation', (req, res) => {
 app.post('/voyage-creation', (req, res) => {
   // retrieve data from form input
   const data = req.body;
+  console.log(data);
   // convert text to upper case
   data.vessel_name = data.vessel_name.toUpperCase();
   const formData = [data.vessel_name, data.voyage_number];
@@ -220,6 +234,159 @@ app.post('/voyage-creation', (req, res) => {
     })
     .catch((err) => {
       console.log('Posting error: ', err);
-      res.status(500).send('Server error. Please check with administrator');
+      res.status(500).send('Server error. Please check with administrator.');
+    });
+});
+// GET for vessel-voyage-creation
+// edit voyage
+app.get('/voyage-creation/:id/edit', (req, res) => {
+  if (req.user.super_user) {
+    const { id } = req.params;
+    const input = [id];
+    const vesselVoyageQuery =
+      'SELECT vessel_voyage.id, vessel_name.id AS vessel_name_id, vessel_name.vessel_name, vessel_voyage.voyage_number FROM vessel_name INNER JOIN vessel_voyage ON vessel_name.id = vessel_voyage.vessel_name WHERE vessel_voyage.id=$1';
+    pool
+      .query(vesselVoyageQuery, input)
+      .then((result) => {
+        const data = result.rows[0];
+        res.render('voyage-creation-edit', { data });
+      })
+      .catch((err) => {
+        console.log('Error: ', err);
+        res.status(500).send('Server error. Please check with administrator.');
+      });
+  } else {
+    res.redirect('/');
+  }
+});
+// PUT for vessel-voyage-creation
+app.put('/voyage-creation/:id/', (req, res) => {
+  const { id } = req.params;
+  const input = [req.body.voyage_number, id];
+  // trim white spaces from input
+  const trimInput = input.map((x) => {
+    return x.trim();
+  });
+  const updateQuery = 'UPDATE vessel_voyage SET voyage_number=$1 WHERE id=$2';
+  pool
+    .query(updateQuery, trimInput)
+    .then(() => {
+      console.log('Successfully updated.');
+      res.redirect('/voyage-creation');
+    })
+    .catch((err) => {
+      console.log('Error: ', err);
+      res.status(500).send('Server error. Please check with administrator.');
+    });
+});
+// DEL for vessel-voyage-creation
+app.delete('/voyage-creation/:id', (req, res) => {
+  const { id } = req.params;
+  const input = [id];
+  const delQuery = 'DELETE from vessel_voyage WHERE id=$1';
+  pool
+    .query(delQuery, input)
+    .then(() => {
+      console.log('Voyage deleted successfully.');
+      res.redirect('back');
+    })
+    .catch((err) => {
+      console.log('Error: ', err);
+      res.status(500).send('Server error. Please check with administrator.');
+    });
+});
+
+////////////
+// vessel //
+////////////
+
+app.get('/vessel-creation', (req, res) => {
+  // check if admin
+  if (req.user.super_user) {
+    const vesselsQuery = 'SELECT * FROM vessel_name';
+    pool
+      .query(vesselsQuery)
+      .then((result) => {
+        const data = result.rows;
+        res.render('vessel-creation-form', { data });
+      })
+      .catch((err) => {
+        console.log('Error: ', err);
+        res.status(500).send('Server error. Please check with administrator.');
+      });
+  } else {
+    res.redirect('/');
+  }
+});
+app.post('/vessel-creation', (req, res) => {
+  const input = [req.body.vessel_name, req.body.teu, req.body.tons];
+  const inputTrim = input.map((x) => {
+    return x.toUpperCase().trim();
+  });
+  const vesselCreationQuery =
+    'INSERT INTO vessel_name(vessel_name, teu, tons) VALUES($1,$2,$3)';
+  pool
+    .query(vesselCreationQuery, inputTrim)
+    .then(() => {
+      console.log('Vessel name successfully added.');
+      res.redirect('back');
+    })
+    .catch((err) => {
+      console.log('Error: ', err);
+      res.status(500).send('Server error. Please check with administrator.');
+    });
+});
+app.get('/vessel-creation/:id/edit', (req, res) => {
+  if (req.user.super_user) {
+    const { id } = req.params;
+    const input = [id];
+    const vesselQuery = 'SELECT * FROM vessel_name WHERE id=$1';
+    pool
+      .query(vesselQuery, input)
+      .then((result) => {
+        const data = result.rows[0];
+        res.render('vessel-creation-edit', { data });
+      })
+      .catch((err) => {
+        console.log('Error: ', err);
+        res.status(500).send('Server error. Please check with administrator.');
+      });
+  } else {
+    res.redirect('/');
+  }
+});
+app.put('/vessel-creation/:id', (req, res) => {
+  const { id } = req.params;
+  const input = [req.body.vessel_name, req.body.teu, req.body.tons, id];
+  const inputTrim = input.map((x) => {
+    return x.toUpperCase().trim();
+  });
+  console.log(inputTrim);
+  const vesselEditQuery =
+    'UPDATE vessel_name SET vessel_name=$1, teu=$2, tons=$3 WHERE id=$4';
+  pool
+    .query(vesselEditQuery, inputTrim)
+    .then(() => {
+      console.log('Vessel name / teu / tons updated successfully.');
+      res.redirect('/vessel-creation');
+    })
+    .catch((err) => {
+      console.log('Error: ', err);
+      res.status(500).send('Server error. Please check with administrator.');
+    });
+});
+app.delete('/vessel-creation/:id', (req, res) => {
+  const { id } = req.params;
+  const input = [id];
+  const delQuery = 'DELETE FROM vessel_name WHERE id=$1';
+  pool
+    .query(delQuery, input)
+    .then(() => {
+      console.log('Vessel successfully deleted.');
+      res.redirect('/vessel-creation');
+    })
+    .catch((err) => {
+      console.log('Error: ', err);
+      res.status(500).send('Server error. Please check with administrator.');
     });
 });
