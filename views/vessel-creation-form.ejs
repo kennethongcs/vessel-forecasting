@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+  <%- include('partials/header', {title: 'Vessel Creation'}) %>
+  <body>
+    <main class="container mt-4">
+      <div class="row">
+        <div
+          class="col-6 border-right border-dark form-container"
+          style="min-height: 500px"
+        >
+          <p class="font-weight-bold">Add new vessel name:</p>
+          <form action="/vessel-creation" class="form-group" method="POST">
+            <label for="vessel_name">Vessel Name:</label>
+            <input
+              type="text"
+              name="vessel_name"
+              id="vessel_name"
+              class="form-control"
+            />
+            <label for="teu">TEUs:</label>
+            <input type="number" name="teu" id="teu" class="form-control" />
+            <label for="tons">Tons:</label>
+            <input type="number" name="tons" id="tons" class="form-control" />
+            <input type="submit" value="Submit" class="btn btn-success mt-4" />
+          </form>
+        </div>
+        <div class="col-6">
+          <p class="font-weight-bold">Vessel List:</p>
+          <table
+            class="table-hover table-bordered mt-4 text-center"
+            style="width: 365px"
+          >
+            <thead>
+              <tr>
+                <th>No.</th>
+                <th>Vessel Name</th>
+                <th>TEUs</th>
+                <th>Tons</th>
+                <th>Functions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% data.forEach((element, i) => { %>
+              <tr>
+                <td><%= i + 1 %></td>
+                <td><%= element.vessel_name %></td>
+                <td><%= element.teu %></td>
+                <td><%= element.tons %></td>
+                <td>
+                  <form
+                    style="display: inline-block"
+                    action="/vessel-creation/<%= element.id %>/edit "
+                  >
+                    <input type="submit" value="Edit" />
+                  </form>
+                  <form
+                    style="display: inline-block"
+                    action="/vessel-creation/<%= element.id %>?_method=DELETE "
+                    method="POST"
+                  >
+                    <input type="submit" value="Del" />
+                  </form>
+                </td>
+              </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </main>
+  </body>
+</html>
