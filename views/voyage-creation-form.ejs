@@ -13,7 +13,7 @@
           <form action="/voyage-creation" method="POST">
             <label for="vessel_name">Vessel Name: </label>
             <select name="vessel_name" id="vessel_name" class="form-control">
-              <% data.forEach(element => { %>
+              <% data.name.forEach(element => { %>
               <option value="<%= element.id %>">
                 <%= element.vessel_name %>
               </option>
@@ -31,13 +31,45 @@
           </form>
         </div>
         <!-- shows current vsl voy -->
-        <table class="table-hover table-bordered mt-4">
-          <thead>
-            <tr></tr>
-          </thead>
-        </table>
         <div class="col-6">
           <p class="font-weight-bold">Display Current Vessels / Voyages:</p>
+          <table
+            class="table-hover table-bordered mt-4 text-center"
+            style="width: 365px"
+          >
+            <thead>
+              <tr>
+                <th>No.</th>
+                <th>Vessel Name</th>
+                <th>Voyage</th>
+                <th>Functions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% for( let i = 0; i < data.voyage.length; i++ ) { %>
+              <tr>
+                <td><%= i + 1 %></td>
+                <td><%= data.voyage[i].vessel_name %></td>
+                <td><%= data.voyage[i].voyage_number %></td>
+                <td>
+                  <form
+                    style="display: inline-block"
+                    action="/voyage-creation/<%= data.voyage[i].id %>/edit "
+                  >
+                    <input type="submit" value="Edit" />
+                  </form>
+                  <form
+                    style="display: inline-block"
+                    action="/voyage-creation/<%= data.voyage[i].id %>?_method=DELETE "
+                    method="POST"
+                  >
+                    <input type="submit" value="Del" />
+                  </form>
+                </td>
+                <% } %>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </div>
     </main>
