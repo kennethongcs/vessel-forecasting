@@ -180,12 +180,13 @@ app.get('/admin', (req, res) => {
   }
 });
 // GET shows form to create new vessel / voyage
-// GET shows current vessels in DB
+// GET shows current vessels in DB DOING
 app.get('/voyage-creation', (req, res) => {
   // verify if user has super user rights
   if (req.user.super_user) {
     // show admin ejs
-    const vesselNameQuery = 'SELECT * FROM vessel_name';
+    const vesselNameQuery =
+      'SELECT vessel_name.id, vessel_name.vessel_name, vessel_voyage.voyage_number FROM vessel_name INNER JOIN vessel_voyage ON vessel_name.id = vessel_voyage.vessel_name';
     pool
       .query(vesselNameQuery)
       .then((result) => {
@@ -207,7 +208,7 @@ app.post('/voyage-creation', (req, res) => {
   const data = req.body;
   // convert text to upper case
   data.vessel_name = data.vessel_name.toUpperCase();
-  const formData = [data.vessel_name, data.vessel_voyage];
+  const formData = [data.vessel_name, data.voyage_number];
   // query to add data into vessel_voyage table
   const voyageAddQuery =
     'INSERT INTO vessel_voyage(vessel_name, voyage_number) VALUES($1, $2)';
@@ -215,6 +216,7 @@ app.post('/voyage-creation', (req, res) => {
     .query(voyageAddQuery, formData)
     .then((result) => {
       console.log('Added voyage successfully');
+      res.redirect('back');
     })
     .catch((err) => {
       console.log('Posting error: ', err);
