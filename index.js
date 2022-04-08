@@ -390,3 +390,25 @@ app.delete('/vessel-creation/:id', (req, res) => {
       res.status(500).send('Server error. Please check with administrator.');
     });
 });
+
+//////////
+// port //
+//////////
+app.get('/port-creation', (req, res) => {
+  // check if admin
+  if (req.user.super_user) {
+    const portQuery = 'SELECT * FROM vessel_name';
+    pool
+      .query(portQuery)
+      .then((result) => {
+        const data = result.rows;
+        res.render('port-creation-form', { data });
+      })
+      .catch((err) => {
+        console.log('Error: ', err);
+        res.status(500).send('Server error. Please check with administrator.');
+      });
+  } else {
+    res.redirect('/');
+  }
+});
