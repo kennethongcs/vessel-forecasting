@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+  <%- include('partials/header', {title: 'Port Creation'}) %>
+  <body>
+    <main class="container mt-4">
+      <div class="row">
+        <div class="col-6 border-right border-dark" style="min-height: 500px">
+          <p class="font-weight-bold">Add new port:</p>
+          <form action="/port-creation" method="POST">
+            <div class="form-group">
+              <label for="port_name">Port Name:</label>
+              <input
+                type="text"
+                name="port_name"
+                id="port_name"
+                placeholder="eg. BANGKOK"
+                class="form-control"
+              />
+            </div>
+            <div class="form-group">
+              <label for="port_code">Port Code:</label>
+              <input
+                type="text"
+                name="port_code"
+                id="port_code"
+                placeholder="eg. THBKK"
+                class="form-control"
+              />
+            </div>
+            <input type="submit" value="Submit" class="btn btn-success" />
+          </form>
+        </div>
+        <div class="col-6">
+          <p class="font-weight-bold">Port List:</p>
+          <table
+            class="table-hover table-bordered mt-4 text-center"
+            style="width: 365px"
+          >
+            <thead>
+              <tr>
+                <th>No.</th>
+                <th>Port Name</th>
+                <th>Port Code</th>
+                <th>Functions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% data.forEach((element, i) => { %>
+              <tr>
+                <td><%= i + 1 %></td>
+                <td><%= element.port_name %></td>
+                <td><%= element.port_code %></td>
+                <td>
+                  <form
+                    style="display: inline-block"
+                    action="/port-creation/<%= element.id %>/edit"
+                  >
+                    <input type="submit" value="Edit" />
+                  </form>
+                  <form
+                    style="display: inline-block"
+                    action="/port-creation/<%= element.id %>?_method=DELETE"
+                    method="POST"
+                  >
+                    <input type="submit" value="Del" />
+                  </form>
+                </td>
+              </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </main>
+  </body>
+</html>
