@@ -5,6 +5,7 @@ import methodOverride from 'method-override';
 import cookieParser from 'cookie-parser';
 import jsSHA from 'jssha';
 import multer from 'multer';
+import axios from 'axios';
 import { getHash, getHashSalted } from './helper_functions.js';
 
 const pgConnectionConfigs = {
@@ -555,6 +556,154 @@ app.delete('/service-creation/:id', (req, res) => {
     .then(() => {
       console.log('Service name deleted successfully.');
       res.redirect('/service-creation');
+    })
+    .catch((err) => {
+      console.log('Error: ', err);
+      res.status(500).send('Server error. Please check with administrator.');
+    });
+});
+
+////////////////
+// allocation //
+////////////////
+app.get('/allocation-creation', (req, res) => {
+  // check if admin
+  if (req.user.super_user) {
+    let allQueryObj = {};
+    const countryQuery = 'SELECT * FROM country';
+    pool
+      .query(countryQuery)
+      .then((result) => {
+        allQueryObj.country = result.rows;
+        const serviceQuery = 'SELECT * FROM service_name';
+        return pool.query(serviceQuery);
+      })
+      .then((result) => {
+        allQueryObj.service = result.rows;
+        const vesselQuery = 'SELECT * FROM vessel_name';
+        return pool.query(vesselQuery);
+      })
+      .then((result) => {
+        allQueryObj.vessel = result.rows;
+        const portQuery = 'SELECT * FROM port_name';
+        return pool.query(portQuery);
+      })
+      .then((result) => {
+        allQueryObj.port = result.rows;
+        const allocQuery =
+          'SELECT vessel_alloc_at_port.id, service_name.service_name, port_name.port_code, country.country_name, vessel_name.vessel_name, vessel_alloc_at_port.teu, vessel_alloc_at_port.tons FROM vessel_alloc_at_port INNER JOIN service_name ON vessel_alloc_at_port.service_name = service_name.id INNER JOIN port_name ON vessel_alloc_at_port.port_name = port_name.id INNER JOIN country ON vessel_alloc_at_port.country_name = country.id INNER JOIN vessel_name ON vessel_alloc_at_port.vessel_name = vessel_name.id';
+        return pool.query(allocQuery);
+      })
+      .then((result) => {
+        const data = result.rows;
+        res.render('allocation-creation-form', { allQueryObj, data });
+      })
+      .catch((err) => {
+        console.log('Error: ', err);
+        res.status(500).send('Server error. Please check with administrator.');
+      });
+  } else {
+    res.redirect('/');
+  }
+});
+app.post('/allocation-creation', (req, res) => {
+  const input = [
+    req.body.service_name,
+    req.body.port_name,
+    req.body.country_name,
+    req.body.vessel_name,
+    req.body.teu,
+    req.body.tons,
+  ];
+  const inputEdit = input.map((x) => {
+    return x.toUpperCase().trim();
+  });
+  const insertQuery =
+    'INSERT INTO vessel_alloc_at_port(service_name, port_name, country_name, vessel_name, teu, tons) VALUES($1, $2, $3, $4, $5, $6)';
+  pool
+    .query(insertQuery, inputEdit)
+    .then(() => {
+      console.log('Service name inserted successfully.');
+      res.redirect('/allocation-creation');
+    })
+    .catch((err) => {
+      console.log('Error: ', err);
+      res.status(500).send('Server error. Please check with administrator.');
+    });
+});
+app.get('/allocation-creation/:id/edit', (req, res) => {
+  const { id } = req.params;
+  const input = [id];
+  let allQueryObj = {};
+  const countryQuery = 'SELECT * FROM country';
+  pool
+    .query(countryQuery)
+    .then((result) => {
+      allQueryObj.country = result.rows;
+      const serviceQuery = 'SELECT * FROM service_name';
+      return pool.query(serviceQuery);
+    })
+    .then((result) => {
+      allQueryObj.service = result.rows;
+      const vesselQuery = 'SELECT * FROM vessel_name';
+      return pool.query(vesselQuery);
+    })
+    .then((result) => {
+      allQueryObj.vessel = result.rows;
+      const portQuery = 'SELECT * FROM port_name';
+      return pool.query(portQuery);
+    })
+    .then((result) => {
+      allQueryObj.port = result.rows;
+      const allocQuery =
+        'SELECT vessel_alloc_at_port.id, service_name.service_name, port_name.port_code, country.country_name, vessel_name.vessel_name, vessel_alloc_at_port.teu, vessel_alloc_at_port.tons FROM vessel_alloc_at_port INNER JOIN service_name ON vessel_alloc_at_port.service_name = service_name.id INNER JOIN port_name ON vessel_alloc_at_port.port_name = port_name.id INNER JOIN country ON vessel_alloc_at_port.country_name = country.id INNER JOIN vessel_name ON vessel_alloc_at_port.vessel_name = vessel_name.id';
+      return pool.query(allocQuery);
+    })
+    .then((result) => {
+      const data = result.rows[0];
+      res.render('allocation-creation-edit', { allQueryObj, data });
+    })
+    .catch((err) => {
+      console.log('Error: ', err);
+      res.status(500).send('Server error. Please check with administrator.');
+    });
+});
+app.put('/allocation-creation/:id', (req, res) => {
+  const { id } = req.params;
+  const input = [
+    req.body.service_name,
+    req.body.port_name,
+    req.body.country_name,
+    req.body.vessel_name,
+    req.body.teu,
+    req.body.tons,
+    id,
+  ];
+  const inputEdit = input.map((x) => {
+    return x.toUpperCase().trim();
+  });
+  const updateQuery =
+    'UPDATE vessel_alloc_at_port SET service_name=$1, port_name=$2, country_name=$3, vessel_name=$4, teu=$5, tons=$6 WHERE id=$7';
+  pool
+    .query(updateQuery, inputEdit)
+    .then(() => {
+      console.log('Allocation updated successfully.');
+      res.redirect('/allocation-creation');
+    })
+    .catch((err) => {
+      console.log('Error: ', err);
+      res.status(500).send('Server error. Please check with administrator.');
+    });
+});
+app.delete('/allocation-creation/:id', (req, res) => {
+  const { id } = req.params;
+  const input = [id];
+  const deleteQuery = 'DELETE FROM vessel_alloc_at_port WHERE id=$1';
+  pool
+    .query(deleteQuery, input)
+    .then(() => {
+      console.log('Allocation deleted successfully.');
+      res.redirect('/allocation-creation');
     })
     .catch((err) => {
       console.log('Error: ', err);
