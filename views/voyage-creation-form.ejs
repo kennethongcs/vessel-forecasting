@@ -9,7 +9,7 @@
           <p class="font-weight-bold">Add new voyage after selecting vessel:</p>
           <form action="/voyage-creation" method="POST">
             <div class="form-group">
-              <label for="vessel_name">Vessel Name: </label>
+              <label for="vessel_name">Vessel Name:</label>
               <select name="vessel_name" id="vessel_name" class="form-control">
                 <% data.name.forEach(element => { %>
                 <option value="<%= element.id %>">
