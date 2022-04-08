@@ -474,3 +474,90 @@ app.delete('/port-creation/:id', (req, res) => {
       res.status(500).send('Server error. Please check with administrator.');
     });
 });
+
+/////////////
+// service //
+/////////////
+app.get('/service-creation', (req, res) => {
+  // check if admin
+  if (req.user.super_user) {
+    const serviceQuery = 'SELECT * FROM service_name';
+    pool
+      .query(serviceQuery)
+      .then((result) => {
+        const data = result.rows;
+        res.render('service-creation-form', { data });
+      })
+      .catch((err) => {
+        console.log('Error: ', err);
+        res.status(500).send('Server error. Please check with administrator.');
+      });
+  } else {
+    res.redirect('/');
+  }
+});
+app.post('/service-creation', (req, res) => {
+  const input = [req.body.service_name];
+  const inputEdit = input.map((x) => {
+    return x.toUpperCase().trim();
+  });
+  const insertQuery = 'INSERT INTO service_name(service_name) VALUES($1)';
+  pool
+    .query(insertQuery, inputEdit)
+    .then(() => {
+      console.log('Service name inserted successfully.');
+      res.redirect('/service-creation');
+    })
+    .catch((err) => {
+      console.log('Error: ', err);
+      res.status(500).send('Server error. Please check with administrator.');
+    });
+});
+app.get('/service-creation/:id/edit', (req, res) => {
+  const { id } = req.params;
+  const input = [id];
+  const serviceEditQuery = 'SELECT * FROM service_name WHERE id=$1';
+  pool
+    .query(serviceEditQuery, input)
+    .then((result) => {
+      const data = result.rows[0];
+      res.render('service-creation-edit', { data });
+    })
+    .catch((err) => {
+      console.log('Error: ', err);
+      res.status(500).send('Server error. Please check with administrator.');
+    });
+});
+app.put('/service-creation/:id', (req, res) => {
+  const { id } = req.params;
+  const input = [req.body.service_name, id];
+  const inputEdit = input.map((x) => {
+    return x.toUpperCase().trim();
+  });
+  const updateQuery = 'UPDATE service_name SET service_name=$1 WHERE id=$2';
+  pool
+    .query(updateQuery, inputEdit)
+    .then(() => {
+      console.log('Service name updated successfully.');
+      res.redirect('/service-creation');
+    })
+    .catch((err) => {
+      console.log('Error: ', err);
+      res.status(500).send('Server error. Please check with administrator.');
+    });
+});
+app.delete('/service-creation/:id', (req, res) => {
+  const { id } = req.params;
+  const input = [id];
+  const deleteQuery = 'DELETE FROM service_name WHERE id=$1';
+  pool
+    .query(deleteQuery, input)
+    .then(() => {
+      console.log('Service name deleted successfully.');
+      res.redirect('/service-creation');
+    })
+    .catch((err) => {
+      console.log('Error: ', err);
+      res.status(500).send('Server error. Please check with administrator.');
+    });
+});
