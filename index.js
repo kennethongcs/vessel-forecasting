@@ -5,8 +5,7 @@ import methodOverride from 'method-override';
 import cookieParser from 'cookie-parser';
 import jsSHA from 'jssha';
 import multer from 'multer';
-import { getHash } from './helper_functions.js';
-import { getHashSalted } from './helper_functions.js';
+import { getHash, getHashSalted } from './helper_functions.js';
 
 const pgConnectionConfigs = {
   user: 'kennethongcs',
@@ -31,7 +30,6 @@ app.use(methodOverride('_method'));
 app.use(cookieParser());
 // set the name of the upload directory here
 const multerUpload = multer({ dest: 'uploads/' });
-
 // check if user is logged in and passes it into a cookie
 app.use((req, res, next) => {
   // set the default value
@@ -40,14 +38,11 @@ app.use((req, res, next) => {
   if (req.cookies.userId && req.cookies.sessionId) {
     // get the hased value that should be inside the cookie
     const hash = getHashSalted(req.cookies.userId);
-
     // test the value of the cookie
     if (req.cookies.sessionId === hash) {
       req.isUserLoggedIn = true;
-
       // look for this user in the database
       const values = [req.cookies.userId];
-
       // try to get the user
       pool.query(
         'SELECT * FROM accounts WHERE user_name=$1',
@@ -219,7 +214,6 @@ app.get('/voyage-creation', (req, res) => {
 app.post('/voyage-creation', (req, res) => {
   // retrieve data from form input
   const data = req.body;
-  console.log(data);
   // convert text to upper case
   data.vessel_name = data.vessel_name.toUpperCase();
   const formData = [data.vessel_name, data.voyage_number];
@@ -397,7 +391,7 @@ app.delete('/vessel-creation/:id', (req, res) => {
 app.get('/port-creation', (req, res) => {
   // check if admin
   if (req.user.super_user) {
-    const portQuery = 'SELECT * FROM vessel_name';
+    const portQuery = 'SELECT * FROM port_name';
     pool
       .query(portQuery)
       .then((result) => {
@@ -411,4 +405,72 @@ app.get('/port-creation', (req, res) => {
   } else {
     res.redirect('/');
   }
+});
+app.post('/port-creation', (req, res) => {
+  const input = [req.body.port_name, req.body.port_code];
+  const inputEdit = input.map((x) => {
+    return x.toUpperCase().trim();
+  });
+  const insertQuery =
+    'INSERT INTO port_name(port_name, port_code) VALUES($1, $2)';
+  pool
+    .query(insertQuery, inputEdit)
+    .then(() => {
+      console.log('Port name / code inserted successfully.');
+      res.redirect('/port-creation');
+    })
+    .catch((err) => {
+      console.log('Error: ', err);
+      res.status(500).send('Server error. Please check with administrator.');
+    });
+});
+app.get('/port-creation/:id/edit', (req, res) => {
+  const { id } = req.params;
+  const input = [id];
+  const portEditQuery = 'SELECT * FROM port_name WHERE id=$1';
+  pool
+    .query(portEditQuery, input)
+    .then((result) => {
+      const data = result.rows[0];
+      res.render('port-creation-edit', { data });
+    })
+    .catch((err) => {
+      console.log('Error: ', err);
+      res.status(500).send('Server error. Please check with administrator.');
+    });
+});
+app.put('/port-creation/:id', (req, res) => {
+  const { id } = req.params;
+  const input = [req.body.port_name, req.body.port_code, id];
+  const inputEdit = input.map((x) => {
+    return x.toUpperCase().trim();
+  });
+  const updateQuery =
+    'UPDATE port_name SET port_name=$1, port_code=$2 WHERE id=$3';
+
+  pool
+    .query(updateQuery, inputEdit)
+    .then(() => {
+      console.log('Port name / code updated successfully.');
+      res.redirect('/port-creation');
+    })
+    .catch((err) => {
+      console.log('Error: ', err);
+      res.status(500).send('Server error. Please check with administrator.');
+    });
+});
+app.delete('/port-creation/:id', (req, res) => {
+  const { id } = req.params;
+  const input = [id];
+  const deleteQuery = 'DELETE FROM port_name WHERE id=$1';
+  pool
+    .query(deleteQuery, input)
+    .then(() => {
+      console.log('Port name / code deleted successfully.');
+      res.redirect('/port-creation');
+    })
+    .catch((err) => {
+      console.log('Error: ', err);
+      res.status(500).send('Server error. Please check with administrator.');
+    });
 });
