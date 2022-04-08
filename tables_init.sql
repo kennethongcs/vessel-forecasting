@@ -82,7 +82,7 @@ CREATE TABLE IF NOT EXISTS service_name (
 CREATE TABLE IF NOT EXISTS port_name (
     id SERIAL NOT NULL PRIMARY KEY,
     port_name TEXT,
-    port_code TEXT
+    port_code VARCHAR(5)
  );
  
 CREATE TABLE IF NOT EXISTS vessel_alloc_at_port (
