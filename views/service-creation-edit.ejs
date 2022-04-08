@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+  <%- include('partials/header', {title: 'Service Edit Form' }) %>
+  <body>
+    <main class="container mt-4">
+      <form action="/service-creation/<%= data.id %>?_method=PUT" method="POST">
+        <div class="form-group">
+          <label for="service_name">Service Name:</label>
+          <input
+            type="text"
+            name="service_name"
+            id="service_name"
+            value="<%= data.service_name %>"
+            class="form-control"
+          />
+        </div>
+        <input type="submit" value="Submit" class="btn btn-success" />
+      </form>
+    </main>
+  </body>
+</html>
