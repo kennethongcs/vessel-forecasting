@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+  <%- include('partials/header', {title: 'Service Creation'}) %>
+  <body>
+    <main class="container mt-4">
+      <div class="row">
+        <div class="col-6 border-right border-dark" style="min-height: 500px">
+          <p class="font-weight-bold">Add new service:</p>
+          <form action="/service-creation" method="post">
+            <div class="form-group">
+              <label for="service_name">Service Name:</label>
+              <input
+                type="text"
+                name="service_name"
+                id="service_name"
+                class="form-control"
+              />
+            </div>
+            <input type="submit" value="Submit" class="btn btn-success" />
+          </form>
+        </div>
+        <div class="col-6">
+          <p class="font-weight-bold">Service List:</p>
+          <table
+            class="table-hover table-bordered mt-4 text-center"
+            style="width: 365px"
+          >
+            <thead>
+              <tr>
+                <th>No.</th>
+                <th>Service Name</th>
+                <th>Functions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% data.forEach((element, i) => { %>
+              <tr>
+                <td><%= i + 1 %></td>
+                <td><%= element.service_name %></td>
+                <td>
+                  <form
+                    style="display: inline-block"
+                    action="/service-creation/<%= element.id %>/edit"
+                  >
+                    <input type="submit" value="Edit" />
+                  </form>
+                  <form
+                    style="display: inline-block"
+                    action="/service-creation/<%= element.id %>?_method=DELETE"
+                    method="POST"
+                  >
+                    <input type="submit" value="Del" />
+                  </form>
+                </td>
+              </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </main>
+  </body>
+</html>
