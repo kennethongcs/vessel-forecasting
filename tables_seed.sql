@@ -11,10 +11,10 @@ INSERT INTO service_name (service_name) VALUES ('BKX3');
 INSERT INTO service_name (service_name) VALUES ('BKX1');
 INSERT INTO service_name (service_name) VALUES ('SGX');
 
-INSERT INTO port_name (port_name, port_code) VALUES ('Laemchabang', 'THLCH');
-INSERT INTO port_name (port_name, port_code) VALUES ('Bangkok', 'THBKK');
-INSERT INTO port_name (port_name, port_code) VALUES ('Songkla', 'THSGZ');
-INSERT INTO port_name (port_name, port_code) VALUES ('Kuantan', 'MYKUA');
+INSERT INTO port_name (port_name, port_code) VALUES ('LAEMCHABANG', 'THLCH');
+INSERT INTO port_name (port_name, port_code) VALUES ('BANGKOK', 'THBKK');
+INSERT INTO port_name (port_name, port_code) VALUES ('SONGKLA', 'THSGZ');
+INSERT INTO port_name (port_name, port_code) VALUES ('KUANTAN', 'MYKUA');
 
 INSERT INTO vessel_name (vessel_name, TEU, TONS) VALUES ('SINAR BINTAN', 893, 12500);
 INSERT INTO vessel_name (vessel_name, TEU, TONS) VALUES ('SINAR BANDUNG', 893, 12500);
