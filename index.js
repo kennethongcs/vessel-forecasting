@@ -165,9 +165,6 @@ app.get('/vessels', (req, res) => {
 // ADMIN PANEL //
 /////////////////
 
-////////////
-// voyage //
-////////////
 // GET shows admin panel
 app.get('/admin', (req, res) => {
   // verify if user has super user rights
@@ -178,8 +175,11 @@ app.get('/admin', (req, res) => {
     res.redirect('/');
   }
 });
+
+////////////
+// voyage //
+////////////
 // GET shows form to create new vessel / voyage
-// GET shows current vessels in DB DOING
 app.get('/voyage-creation', (req, res) => {
   // verify if user has super user rights
   if (req.user.super_user) {
@@ -569,7 +569,7 @@ app.delete('/service-creation/:id', (req, res) => {
 app.get('/allocation-creation', (req, res) => {
   // check if admin
   if (req.user.super_user) {
-    let allQueryObj = {};
+    const allQueryObj = {};
     const countryQuery = 'SELECT * FROM country';
     pool
       .query(countryQuery)
@@ -634,7 +634,7 @@ app.post('/allocation-creation', (req, res) => {
 app.get('/allocation-creation/:id/edit', (req, res) => {
   const { id } = req.params;
   const input = [id];
-  let allQueryObj = {};
+  const allQueryObj = {};
   const countryQuery = 'SELECT * FROM country';
   pool
     .query(countryQuery)
@@ -710,3 +710,120 @@ app.delete('/allocation-creation/:id', (req, res) => {
       res.status(500).send('Server error. Please check with administrator.');
     });
 });
+
+//////////////
+// schedule //
+//////////////
+app.get('/schedule-creation', (req, res) => {
+  // check if admin
+  if (req.user.super_user) {
+    const allQueryObj = {};
+    const voyageQuery = 'SELECT * FROM vessel_voyage';
+    pool
+      .query(voyageQuery)
+      .then((result) => {
+        allQueryObj.voyage = result.rows;
+        const serviceQuery = 'SELECT * FROM service_name';
+        return pool.query(serviceQuery);
+      })
+      .then((result) => {
+        allQueryObj.service = result.rows;
+        const vesselQuery = 'SELECT * FROM vessel_name';
+        return pool.query(vesselQuery);
+      })
+      .then((result) => {
+        allQueryObj.vessel = result.rows;
+        const portQuery = 'SELECT * FROM port_name';
+        return pool.query(portQuery);
+      })
+      .then((result) => {
+        allQueryObj.port = result.rows;
+        const scheduleQuery =
+          'SELECT vessel_schedule.id, vessel_name.vessel_name, vessel_voyage.voyage_number, service_name.service_name, port_name.port_code, vessel_schedule.eta, vessel_schedule.etd FROM vessel_schedule INNER JOIN vessel_name ON vessel_schedule.vessel_name = vessel_name.id INNER JOIN vessel_voyage ON vessel_schedule.voyage_number = vessel_voyage.id INNER JOIN service_name ON vessel_schedule.service_name = service_name.id INNER JOIN port_name ON vessel_schedule.port_name = port_name.id';
+        return pool.query(scheduleQuery);
+      })
+      .then((result) => {
+        const data = result.rows;
+        res.render('schedule-creation-form', { allQueryObj, data });
+      })
+      .catch((err) => {
+        console.log('Error: ', err);
+        res.status(500).send('Server error. Please check with administrator.');
+      });
+  } else {
+    res.redirect('/');
+  }
+});
+app.post('/schedule-creation', (req, res) => {
+  const input = [
+    req.body.vessel_name,
+    req.body.voyage_number,
+    req.body.service_name,
+    req.body.port_code,
+    req.body.eta,
+    req.body.etd,
+  ];
+  const inputEdit = input.map((x) => {
+    return x.toUpperCase().trim();
+  });
+  const insertQuery =
+    'INSERT INTO vessel_schedule(vessel_name, voyage_number, service_name, port_name, eta, etd) VALUES($1, $2, $3, $4, $5, $6)';
+  pool
+    .query(insertQuery, inputEdit)
+    .then(() => {
+      console.log('Schedule inserted successfully.');
+      res.redirect('/schedule-creation');
+    })
+    .catch((err) => {
+      console.log('Error: ', err);
+      res.status(500).send('Server error. Please check with administrator.');
+    });
+});
+// app.get('/service-creation/:id/edit', (req, res) => {
+//   const { id } = req.params;
+//   const input = [id];
+//   const serviceEditQuery = 'SELECT * FROM service_name WHERE id=$1';
+//   pool
+//     .query(serviceEditQuery, input)
+//     .then((result) => {
+//       const data = result.rows[0];
+//       res.render('service-creation-edit', { data });
+//     })
+//     .catch((err) => {
+//       console.log('Error: ', err);
+//       res.status(500).send('Server error. Please check with administrator.');
+//     });
+// });
+// app.put('/service-creation/:id', (req, res) => {
+//   const { id } = req.params;
+//   const input = [req.body.service_name, id];
+//   const inputEdit = input.map((x) => {
+//     return x.toUpperCase().trim();
+//   });
+//   const updateQuery = 'UPDATE service_name SET service_name=$1 WHERE id=$2';
+//   pool
+//     .query(updateQuery, inputEdit)
+//     .then(() => {
+//       console.log('Service name updated successfully.');
+//       res.redirect('/service-creation');
+//     })
+//     .catch((err) => {
+//       console.log('Error: ', err);
+//       res.status(500).send('Server error. Please check with administrator.');
+//     });
+// });
+// app.delete('/service-creation/:id', (req, res) => {
+//   const { id } = req.params;
+//   const input = [id];
+//   const deleteQuery = 'DELETE FROM service_name WHERE id=$1';
+//   pool
+//     .query(deleteQuery, input)
+//     .then(() => {
+//       console.log('Service name deleted successfully.');
+//       res.redirect('/service-creation');
+//     })
+//     .catch((err) => {
+//       console.log('Error: ', err);
+//       res.status(500).send('Server error. Please check with administrator.');
+//     });
+// });
