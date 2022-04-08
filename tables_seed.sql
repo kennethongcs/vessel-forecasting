@@ -6,6 +6,7 @@ INSERT INTO country (country_name) VALUES ('Malaysia');
 INSERT INTO country (country_name) VALUES ('Indonesia');
 INSERT INTO country (country_name) VALUES ('Vietnam');
 INSERT INTO country (country_name) VALUES ('Philippines');
+INSERT INTO country (country_name) VALUES ('Thailand');
 
 INSERT INTO service_name (service_name) VALUES ('BKX3');
 INSERT INTO service_name (service_name) VALUES ('BKX1');
