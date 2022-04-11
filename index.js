@@ -88,7 +88,12 @@ app.get('/', (req, res) => {
   // if user is logged in, redirect to index
   if (req.isUserLoggedIn) {
     const userData = req.user;
-    res.render('index', userData);
+    const scheduleQuery =
+      'SELECT vessel_schedule.id, vessel_name.id AS vessel_name_id ,vessel_name.vessel_name, vessel_voyage.voyage_number, service_name.service_name, port_name.port_code, vessel_schedule.eta, vessel_schedule.etd FROM vessel_schedule INNER JOIN vessel_name ON vessel_schedule.vessel_name = vessel_name.id INNER JOIN vessel_voyage ON vessel_schedule.voyage_number = vessel_voyage.id INNER JOIN service_name ON vessel_schedule.service_name = service_name.id INNER JOIN port_name ON vessel_schedule.port_name = port_name.id';
+    pool.query(scheduleQuery).then((result) => {
+      const data = result.rows;
+      res.render('index', { userData, data });
+    });
   }
 });
 
