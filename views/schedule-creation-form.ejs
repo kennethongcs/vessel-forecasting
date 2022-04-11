@@ -8,13 +8,21 @@
           <form action="/schedule-creation" method="POST">
             <div class="form-group">
               <label for="vessel_name">Vessel Name:</label>
-              <select name="vessel_name" id="vessel_name" class="form-control">
-                <% allQueryObj.vessel.forEach(element => { %>
-                <option value="<%= element.id %> ">
-                  <%= element.vessel_name %>
+              <select id="vessel_name" class="form-control" disabled>
+                <% allQueryObj.voyage.forEach(element => { %>
+                <option value="<%= element.vessel_name_id%>" selected>
+                  <%= element.vessel_name%>
                 </option>
                 <% }) %>
               </select>
+              <input
+                type="text"
+                name="vessel_name"
+                id="vessel_name"
+                value="<%= allQueryObj.voyage[0].vessel_name_id%>"
+                class="form-control"
+                hidden
+              />
             </div>
             <div class="form-group">
               <label for="voyage_number">Voyage Number:</label>
@@ -24,7 +32,7 @@
                 class="form-control"
               >
                 <% allQueryObj.voyage.forEach(element => { %>
-                <option value="<%= element.id %> ">
+                <option value="<%= element.vessel_voyage_id %>">
                   <%= element.voyage_number %>
                 </option>
                 <% }) %>
@@ -84,28 +92,30 @@
             </thead>
             <tbody>
               <% data.forEach((element, i) => { %>
-              <td><%= i + 1 %></td>
-              <td><%= element.vessel_name %></td>
-              <td><%= element.voyage_number %></td>
-              <td><%= element.service_name %></td>
-              <td><%= element.port_code %></td>
-              <td><%= element.eta %></td>
-              <td><%= element.etd%></td>
-              <td>
-                <form
-                  style="display: inline-block"
-                  action="/schedule-creation/<%= element.id %>/edit"
-                >
-                  <input type="submit" value="Edit" />
-                </form>
-                <form
-                  style="display: inline-block"
-                  action="/schedule-creation/<%= element.id %>?_method=DELETE"
-                  method="POST"
-                >
-                  <input type="submit" value="Del" />
-                </form>
-              </td>
+              <tr>
+                <td><%= i + 1 %></td>
+                <td><%= element.vessel_name %></td>
+                <td><%= element.voyage_number %></td>
+                <td><%= element.service_name %></td>
+                <td><%= element.port_code %></td>
+                <td><%= element.eta %></td>
+                <td><%= element.etd%></td>
+                <td>
+                  <form
+                    style="display: inline-block"
+                    action="/schedule-creation/<%= element.id %>/edit"
+                  >
+                    <input type="submit" value="Edit" />
+                  </form>
+                  <form
+                    style="display: inline-block"
+                    action="/schedule-creation/<%= element.id %>?_method=DELETE"
+                    method="POST"
+                  >
+                    <input type="submit" value="Del" />
+                  </form>
+                </td>
+              </tr>
               <% }) %>
             </tbody>
           </table>
