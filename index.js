@@ -712,15 +712,42 @@ app.delete('/allocation-creation/:id', (req, res) => {
 });
 
 //////////////
-// schedule //
+// schedule // DOING
 //////////////
-app.get('/schedule-creation', (req, res) => {
+// GET shows available vessels
+app.get('/vessels-selection', (req, res) => {
+  // check if user is logged in
+  if (req.isUserLoggedIn) {
+    if (req.user.super_user) {
+      // query list of vessels
+      const queryVessels = 'SELECT * FROM vessel_name';
+      pool
+        .query(queryVessels)
+        .then((result) => {
+          const data = result.rows;
+          res.render('vessel-list-selection', { data });
+        })
+        .catch((err) => {
+          console.log('Vessel get error: ', err);
+          res.status(500).send('Please contact administrator');
+        });
+    } else {
+      res.redirect('/');
+    }
+  } else {
+    res.redirect('/');
+  }
+});
+app.get('/schedule-creation/:id', (req, res) => {
   // check if admin
   if (req.user.super_user) {
+    // select vessel to add schedule
     const allQueryObj = {};
-    const voyageQuery = 'SELECT * FROM vessel_voyage';
+    const input = [req.params.id];
+    const voyageQuery =
+      'SELECT vessel_voyage.vessel_name AS vessel_name_id, vessel_name.vessel_name, vessel_voyage.id AS vessel_voyage_id,vessel_voyage.voyage_number,  vessel_name.teu, vessel_name.tons FROM vessel_voyage INNER JOIN vessel_name ON vessel_voyage.vessel_name = vessel_name.id WHERE vessel_voyage.vessel_name = $1';
     pool
-      .query(voyageQuery)
+      .query(voyageQuery, input)
       .then((result) => {
         allQueryObj.voyage = result.rows;
         const serviceQuery = 'SELECT * FROM service_name';
@@ -739,11 +766,12 @@ app.get('/schedule-creation', (req, res) => {
       .then((result) => {
         allQueryObj.port = result.rows;
         const scheduleQuery =
-          'SELECT vessel_schedule.id, vessel_name.vessel_name, vessel_voyage.voyage_number, service_name.service_name, port_name.port_code, vessel_schedule.eta, vessel_schedule.etd FROM vessel_schedule INNER JOIN vessel_name ON vessel_schedule.vessel_name = vessel_name.id INNER JOIN vessel_voyage ON vessel_schedule.voyage_number = vessel_voyage.id INNER JOIN service_name ON vessel_schedule.service_name = service_name.id INNER JOIN port_name ON vessel_schedule.port_name = port_name.id';
-        return pool.query(scheduleQuery);
+          'SELECT vessel_schedule.id, vessel_name.id AS vessel_name_id ,vessel_name.vessel_name, vessel_voyage.voyage_number, service_name.service_name, port_name.port_code, vessel_schedule.eta, vessel_schedule.etd FROM vessel_schedule INNER JOIN vessel_name ON vessel_schedule.vessel_name = vessel_name.id INNER JOIN vessel_voyage ON vessel_schedule.voyage_number = vessel_voyage.id INNER JOIN service_name ON vessel_schedule.service_name = service_name.id INNER JOIN port_name ON vessel_schedule.port_name = port_name.id WHERE vessel_name.id=$1';
+        return pool.query(scheduleQuery, input);
       })
       .then((result) => {
         const data = result.rows;
+        // console.log(allQueryObj, data);
         res.render('schedule-creation-form', { allQueryObj, data });
       })
       .catch((err) => {
@@ -763,16 +791,17 @@ app.post('/schedule-creation', (req, res) => {
     req.body.eta,
     req.body.etd,
   ];
-  const inputEdit = input.map((x) => {
-    return x.toUpperCase().trim();
-  });
+  console.log(input);
+  // const inputEdit = input.map((x) => {
+  //   return x.toUpperCase().trim();
+  // });
   const insertQuery =
     'INSERT INTO vessel_schedule(vessel_name, voyage_number, service_name, port_name, eta, etd) VALUES($1, $2, $3, $4, $5, $6)';
   pool
-    .query(insertQuery, inputEdit)
+    .query(insertQuery, input)
     .then(() => {
       console.log('Schedule inserted successfully.');
-      res.redirect('/schedule-creation');
+      res.redirect('/vessels-selection');
     })
     .catch((err) => {
       console.log('Error: ', err);
