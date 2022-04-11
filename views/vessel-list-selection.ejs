@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+  <%- include('partials/header', {title: 'Vessel Selection List'}) %>
+  <body>
+    <main class="container">
+      <h3 class="mt-4">Vessel list below</h3>
+      <table class="table table-hover table-bordered mt-4">
+        <thead>
+          <tr>
+            <th>No.</th>
+            <th>Vessel Name</th>
+            <th>Functions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% for( let i = 0; i < data.length; i++ ) { %>
+          <tr>
+            <td><%= i+1 %></td>
+            <td>
+              <a href="#"><%= data[i].vessel_name%> </a>
+            </td>
+            <td>
+              <form action="/schedule-creation/<%= data[i].id%>">
+                <input type="submit" value="Schedule">
+              </form>
+            </td>
+          </tr>
+          <% } %>
+        </tbody>
+      </div>
+    </main>
+  </body>
+</html>
