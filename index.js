@@ -68,7 +68,7 @@ app.use((req, res, next) => {
 });
 // set 'user' so it can be retrieved in every view
 app.use((req, res, next) => {
-  res.locals.user = req.user;
+  app.locals.user = req.user;
   next();
 });
 
