@@ -1,14 +1,36 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <%- include('partials/bootstrap') %> <%- include('partials/nav') %>
-    <link rel="stylesheet" href="/styles.css" />
-    <title>Welcome</title>
-  </head>
+  <%- include('partials/header', {title: 'Welcome'}) %>
   <body>
-    <main class="container"></main>
+    <main class="container mt-4">
+      <table
+        class="table-hover table-bordered mt-4 text-center"
+        style="width: 700px"
+      >
+        <thead>
+          <tr>
+            <th>No.</th>
+            <th>Vessel</th>
+            <th>Voyage</th>
+            <th>Service</th>
+            <th>Port Code</th>
+            <th>ETA</th>
+            <th>ETD</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% data.forEach((element, i) => { %>
+          <td><%= i + 1 %></td>
+          <td><%= element.vessel_name %></td>
+          <td><%= element.voyage_number %></td>
+          <td><%= element.service_name %></td>
+          <td><%= element.port_code %></td>
+          <td><%= element.eta.toISOString().slice(0,10) %></td>
+          <td><%= element.etd.toISOString().slice(0,10)%></td>
+
+          <% }) %>
+        </tbody>
+      </table>
+    </main>
   </body>
 </html>
