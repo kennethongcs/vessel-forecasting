@@ -4,7 +4,7 @@
   <body>
     <main class="container mt-4">
       <table
-        class="table-hover table-bordered mt-4 text-center"
+        class="table-hover table-bordered mt-4 text-center mx-auto"
         style="width: 700px"
       >
         <thead>
@@ -20,14 +20,15 @@
         </thead>
         <tbody>
           <% data.forEach((element, i) => { %>
-          <td><%= i + 1 %></td>
-          <td><%= element.vessel_name %></td>
-          <td><%= element.voyage_number %></td>
-          <td><%= element.service_name %></td>
-          <td><%= element.port_code %></td>
-          <td><%= element.eta.toISOString().slice(0,10) %></td>
-          <td><%= element.etd.toISOString().slice(0,10)%></td>
-
+          <tr>
+            <td><%= i + 1 %></td>
+            <td><%= element.vessel_name %></td>
+            <td><%= element.voyage_number %></td>
+            <td><%= element.service_name %></td>
+            <td><%= element.port_code %></td>
+            <td><%= element.eta %></td>
+            <td><%= element.etd %></td>
+          </tr>
           <% }) %>
         </tbody>
       </table>
