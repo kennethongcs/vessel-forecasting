@@ -6,6 +6,7 @@ import cookieParser from 'cookie-parser';
 import jsSHA from 'jssha';
 import multer from 'multer';
 import axios from 'axios';
+import moment from 'moment';
 import { getHash, getHashSalted } from './helper_functions.js';
 
 const pgConnectionConfigs = {
@@ -92,6 +93,12 @@ app.get('/', (req, res) => {
       'SELECT vessel_schedule.id, vessel_name.id AS vessel_name_id ,vessel_name.vessel_name, vessel_voyage.voyage_number, service_name.service_name, port_name.port_code, vessel_schedule.eta, vessel_schedule.etd FROM vessel_schedule INNER JOIN vessel_name ON vessel_schedule.vessel_name = vessel_name.id INNER JOIN vessel_voyage ON vessel_schedule.voyage_number = vessel_voyage.id INNER JOIN service_name ON vessel_schedule.service_name = service_name.id INNER JOIN port_name ON vessel_schedule.port_name = port_name.id';
     pool.query(scheduleQuery).then((result) => {
       const data = result.rows;
+      // convert db date using moment
+      Object.values(data).forEach((x) => {
+        x.eta = moment(x.eta).format('DD/MMM/YY');
+        x.etd = moment(x.etd).format('DD/MMM/YY');
+      });
+      console.log(data);
       res.render('index', { userData, data });
     });
   }
