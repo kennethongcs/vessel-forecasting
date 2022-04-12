@@ -98,7 +98,6 @@ app.get('/', (req, res) => {
         x.eta = moment(x.eta).format('DD/MMM/YY');
         x.etd = moment(x.etd).format('DD/MMM/YY');
       });
-      console.log(data);
       res.render('index', { userData, data });
     });
   }
@@ -783,7 +782,11 @@ app.get('/schedule-creation/:id', (req, res) => {
       })
       .then((result) => {
         const data = result.rows;
-        // console.log(allQueryObj, data);
+        // use moment to convert date
+        Object.values(data).forEach((x) => {
+          x.eta = moment(x.eta).format('DD/MMM/YY');
+          x.etd = moment(x.etd).format('DD/MMM/YY');
+        });
         res.render('schedule-creation-form', { allQueryObj, data });
       })
       .catch((err) => {
@@ -820,51 +823,56 @@ app.post('/schedule-creation', (req, res) => {
       res.status(500).send('Server error. Please check with administrator.');
     });
 });
-// app.get('/service-creation/:id/edit', (req, res) => {
-//   const { id } = req.params;
-//   const input = [id];
-//   const serviceEditQuery = 'SELECT * FROM service_name WHERE id=$1';
-//   pool
-//     .query(serviceEditQuery, input)
-//     .then((result) => {
-//       const data = result.rows[0];
-//       res.render('service-creation-edit', { data });
-//     })
-//     .catch((err) => {
-//       console.log('Error: ', err);
-//       res.status(500).send('Server error. Please check with administrator.');
-//     });
-// });
-// app.put('/service-creation/:id', (req, res) => {
-//   const { id } = req.params;
-//   const input = [req.body.service_name, id];
-//   const inputEdit = input.map((x) => {
-//     return x.toUpperCase().trim();
-//   });
-//   const updateQuery = 'UPDATE service_name SET service_name=$1 WHERE id=$2';
-//   pool
-//     .query(updateQuery, inputEdit)
-//     .then(() => {
-//       console.log('Service name updated successfully.');
-//       res.redirect('/service-creation');
-//     })
-//     .catch((err) => {
-//       console.log('Error: ', err);
-//       res.status(500).send('Server error. Please check with administrator.');
-//     });
-// });
-// app.delete('/service-creation/:id', (req, res) => {
-//   const { id } = req.params;
-//   const input = [id];
-//   const deleteQuery = 'DELETE FROM service_name WHERE id=$1';
-//   pool
-//     .query(deleteQuery, input)
-//     .then(() => {
-//       console.log('Service name deleted successfully.');
-//       res.redirect('/service-creation');
-//     })
-//     .catch((err) => {
-//       console.log('Error: ', err);
-//       res.status(500).send('Server error. Please check with administrator.');
-//     });
-// });
+app.get('/schedule-creation/:id/edit', (req, res) => {
+  const { id } = req.params;
+  const input = [id];
+  const serviceEditQuery =
+    'SELECT vessel_schedule.id, vessel_name.id AS vessel_name_id ,vessel_name.vessel_name, vessel_voyage.voyage_number, service_name.service_name, port_name.port_code, vessel_schedule.eta, vessel_schedule.etd FROM vessel_schedule INNER JOIN vessel_name ON vessel_schedule.vessel_name = vessel_name.id INNER JOIN vessel_voyage ON vessel_schedule.voyage_number = vessel_voyage.id INNER JOIN service_name ON vessel_schedule.service_name = service_name.id INNER JOIN port_name ON vessel_schedule.port_name = port_name.id WHERE vessel_schedule.id = $1';
+  pool
+    .query(serviceEditQuery, input)
+    .then((result) => {
+      const data = result.rows;
+      Object.values(data).forEach((x) => {
+        x.eta = moment(x.eta).format('YYYY-MM-DD');
+        x.etd = moment(x.etd).format('YYYY-MM-DD');
+      });
+      res.render('schedule-creation-edit', { data });
+    })
+    .catch((err) => {
+      console.log('Error: ', err);
+      res.status(500).send('Server error. Please check with administrator.');
+    });
+});
+app.put('/schedule-creation/:id', (req, res) => {
+  const { id } = req.params;
+  const input = [req.body.eta, req.body.etd, id];
+  const inputEdit = input.map((x) => {
+    return x.toUpperCase().trim();
+  });
+  const updateQuery = 'UPDATE vessel_schedule SET eta=$1, etd=$2 WHERE id=$3';
+  pool
+    .query(updateQuery, inputEdit)
+    .then(() => {
+      console.log('Schedule updated successfully.');
+      res.redirect('/vessels-selection');
+    })
+    .catch((err) => {
+      console.log('Error: ', err);
+      res.status(500).send('Server error. Please check with administrator.');
+    });
+});
+app.delete('/schedule-creation/:id', (req, res) => {
+  const { id } = req.params;
+  const input = [id];
+  const deleteQuery = 'DELETE FROM vessel_schedule WHERE id=$1';
+  pool
+    .query(deleteQuery, input)
+    .then(() => {
+      console.log('Schedule deleted successfully.');
+      res.redirect('/vessels-selection');
+    })
+    .catch((err) => {
+      console.log('Error: ', err);
+      res.status(500).send('Server error. Please check with administrator.');
+    });
+});
