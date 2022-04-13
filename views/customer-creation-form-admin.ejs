@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+  <%- include('partials/header', {title: 'Customer Creation Form'}) %>
+  <body>
+    <main class="container mt-4">
+      <div class="row">
+        <div class="col-6 border-dark border-right" style="min-height: 540px">
+          <p class="font-weight-bold">Add new customer:</p>
+          <form action="/customer-creation" method="POST">
+            <div class="form-group">
+              <label for="customer-name">Customer Name:</label>
+              <input
+                type="text"
+                name="customer_name"
+                id="customer_name"
+                class="form-control"
+                placeholder="eg. OOCL"
+              />
+            </div>
+            <div class="form-group">
+              <label for="op-code">Op Code:</label>
+              <input
+                type="text"
+                name="op_code"
+                id="op_code"
+                class="form-control"
+                maxlength="2"
+                placeholder="eg. OR"
+              />
+            </div>
+            <input type="submit" value="Submit" class="btn btn-success" />
+          </form>
+        </div>
+        <div class="col-6">
+          <p class="font-weight-bold">Current customer list:</p>
+          <table class="table-hover table-bordered mt-4 text-center">
+            <thead>
+              <tr>
+                <th>No.</th>
+                <th>Customer Name</th>
+                <th>Op Code</th>
+                <th>Functions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% data.forEach((element, i) => { %>
+              <tr>
+                <td><%= i + 1%></td>
+                <td><%= element.customer_name %></td>
+                <td><%= element.op_code %></td>
+                <td>
+                  <form
+                    action="/customer-creation/<%= element.id %>/edit"
+                    style="display: inline-block"
+                  >
+                    <input type="submit" value="Edit" />
+                  </form>
+                  <form
+                    action="/customer-creation/<%= element.id %>?_method=DELETE"
+                    method="POST"
+                    style="display: inline-block"
+                  >
+                    <input type="submit" value="Del" />
+                  </form>
+                </td>
+              </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </main>
+  </body>
+</html>
