@@ -723,7 +723,7 @@ app.delete('/allocation-creation/:id', (req, res) => {
 });
 
 //////////////
-// schedule // DOING
+// schedule //
 //////////////
 // GET shows available vessels
 app.get('/vessels-selection', (req, res) => {
@@ -807,9 +807,6 @@ app.post('/schedule-creation', (req, res) => {
     req.body.etd,
   ];
   console.log(input);
-  // const inputEdit = input.map((x) => {
-  //   return x.toUpperCase().trim();
-  // });
   const insertQuery =
     'INSERT INTO vessel_schedule(vessel_name, voyage_number, service_name, port_name, eta, etd) VALUES($1, $2, $3, $4, $5, $6)';
   pool
@@ -870,6 +867,111 @@ app.delete('/schedule-creation/:id', (req, res) => {
     .then(() => {
       console.log('Schedule deleted successfully.');
       res.redirect('/vessels-selection');
+    })
+    .catch((err) => {
+      console.log('Error: ', err);
+      res.status(500).send('Server error. Please check with administrator.');
+    });
+});
+
+//////////////
+// customer //
+//////////////
+// for user to view
+app.get('/customer-list', (req, res) => {
+  // check if admin
+  const customerQuery = 'SELECT * FROM customers';
+  pool
+    .query(customerQuery)
+    .then((result) => {
+      const data = result.rows;
+      res.render('customer-creation-form-user', { data });
+    })
+    .catch((err) => {
+      console.log('Error: ', err);
+      res.status(500).send('Server error. Please check with administrator.');
+    });
+});
+app.get('/customer-creation', (req, res) => {
+  // check if admin
+  if (req.user.super_user) {
+    const customerQuery = 'SELECT * FROM customers';
+    pool
+      .query(customerQuery)
+      .then((result) => {
+        const data = result.rows;
+        res.render('customer-creation-form-admin', { data });
+      })
+      .catch((err) => {
+        console.log('Error: ', err);
+        res.status(500).send('Server error. Please check with administrator.');
+      });
+  } else {
+    res.redirect('/');
+  }
+});
+app.post('/customer-creation', (req, res) => {
+  const input = [req.body.customer_name, req.body.op_code];
+  const inputEdit = input.map((x) => {
+    return x.toUpperCase().trim();
+  });
+  console.log(inputEdit);
+  const insertQuery =
+    'INSERT INTO customers(customer_name, op_code) VALUES($1, $2)';
+  pool
+    .query(insertQuery, inputEdit)
+    .then(() => {
+      console.log('Customer inserted successfully.');
+      res.redirect('/customer-creation');
+    })
+    .catch((err) => {
+      console.log('Error: ', err);
+      res.status(500).send('Server error. Please check with administrator.');
+    });
+});
+app.get('/customer-creation/:id/edit', (req, res) => {
+  const { id } = req.params;
+  const input = [id];
+  const customerEditQuery = 'SELECT * FROM customers WHERE id=$1';
+  pool
+    .query(customerEditQuery, input)
+    .then((result) => {
+      const data = result.rows[0];
+      res.render('customer-creation-edit', { data });
+    })
+    .catch((err) => {
+      console.log('Error: ', err);
+      res.status(500).send('Server error. Please check with administrator.');
+    });
+});
+app.put('/service-creation/:id', (req, res) => {
+  const { id } = req.params;
+  const input = [req.body.customer_name, req.body.op_code, id];
+  const inputEdit = input.map((x) => {
+    return x.toUpperCase().trim();
+  });
+  const updateQuery =
+    'UPDATE customers SET customer_name=$1, op_code=$2 WHERE id=$3';
+  pool
+    .query(updateQuery, inputEdit)
+    .then(() => {
+      console.log('Customer updated successfully.');
+      res.redirect('/customer-creation');
+    })
+    .catch((err) => {
+      console.log('Error: ', err);
+      res.status(500).send('Server error. Please check with administrator.');
+    });
+});
+app.delete('/customer-creation/:id', (req, res) => {
+  const { id } = req.params;
+  const input = [id];
+  const deleteQuery = 'DELETE FROM customers WHERE id=$1';
+  pool
+    .query(deleteQuery, input)
+    .then(() => {
+      console.log('Customer deleted successfully.');
+      res.redirect('/customer-creation');
     })
     .catch((err) => {
       console.log('Error: ', err);
