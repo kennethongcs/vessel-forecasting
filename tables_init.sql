@@ -20,6 +20,8 @@ CREATE TABLE IF NOT EXISTS loadings (
     vessel_name INTEGER,
     voyage_number INTEGER,
     user_name INTEGER,
+    pol VARCHAR(5),
+    pod VARCHAR(5),
     date DATE NOT NULL DEFAULT NOW(),
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
   );
