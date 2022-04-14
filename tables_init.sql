@@ -28,7 +28,6 @@ CREATE TABLE IF NOT EXISTS loadings (
 
 CREATE TABLE IF NOT EXISTS loading_containers (
     id SERIAL NOT NULL PRIMARY KEY,
-    loading_id INTEGER,
     container_size INTEGER,
     container_type INTEGER,
     amt_of_containers INTEGER,
