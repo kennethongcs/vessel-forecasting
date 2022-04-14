@@ -22,7 +22,11 @@
           <% data.forEach((element, i) => { %>
           <tr>
             <td><%= i + 1 %></td>
-            <td><%= element.vessel_name %></td>
+            <td>
+              <a href="/loadings-creation/<%= element.voyage_number_id %> "
+                ><%= element.vessel_name %></a
+              >
+            </td>
             <td><%= element.voyage_number %></td>
             <td><%= element.service_name %></td>
             <td><%= element.port_code %></td>
