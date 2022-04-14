@@ -90,7 +90,7 @@ app.get('/', (req, res) => {
   if (req.isUserLoggedIn) {
     const userData = req.user;
     const scheduleQuery =
-      'SELECT vessel_schedule.id, vessel_name.id AS vessel_name_id ,vessel_name.vessel_name, vessel_voyage.voyage_number, service_name.service_name, port_name.port_code, vessel_schedule.eta, vessel_schedule.etd FROM vessel_schedule INNER JOIN vessel_name ON vessel_schedule.vessel_name = vessel_name.id INNER JOIN vessel_voyage ON vessel_schedule.voyage_number = vessel_voyage.id INNER JOIN service_name ON vessel_schedule.service_name = service_name.id INNER JOIN port_name ON vessel_schedule.port_name = port_name.id';
+      'SELECT vessel_schedule.id, vessel_name.id AS vessel_name_id ,vessel_name.vessel_name, vessel_voyage.id AS voyage_number_id, vessel_voyage.voyage_number, service_name.service_name, port_name.port_code, vessel_schedule.eta, vessel_schedule.etd FROM vessel_schedule INNER JOIN vessel_name ON vessel_schedule.vessel_name = vessel_name.id INNER JOIN vessel_voyage ON vessel_schedule.voyage_number = vessel_voyage.id INNER JOIN service_name ON vessel_schedule.service_name = service_name.id INNER JOIN port_name ON vessel_schedule.port_name = port_name.id';
     pool.query(scheduleQuery).then((result) => {
       const data = result.rows;
       // convert db date using moment
@@ -879,19 +879,23 @@ app.delete('/schedule-creation/:id', (req, res) => {
 //////////////
 // for user to view
 app.get('/customer-list', (req, res) => {
-  // check if admin
-  const customerQuery = 'SELECT * FROM customers';
-  pool
-    .query(customerQuery)
-    .then((result) => {
-      const data = result.rows;
-      res.render('customer-creation-form-user', { data });
-    })
-    .catch((err) => {
-      console.log('Error: ', err);
-      res.status(500).send('Server error. Please check with administrator.');
-    });
+  if (req.isUserLoggedIn) {
+    const customerQuery = 'SELECT * FROM customers';
+    pool
+      .query(customerQuery)
+      .then((result) => {
+        const data = result.rows;
+        res.render('customer-creation-form-user', { data });
+      })
+      .catch((err) => {
+        console.log('Error: ', err);
+        res.status(500).send('Server error. Please check with administrator.');
+      });
+  } else {
+    res.redirect('/');
+  }
 });
+// for admin to view
 app.get('/customer-creation', (req, res) => {
   // check if admin
   if (req.user.super_user) {
@@ -971,6 +975,66 @@ app.delete('/customer-creation/:id', (req, res) => {
     .query(deleteQuery, input)
     .then(() => {
       console.log('Customer deleted successfully.');
+      res.redirect('/customer-creation');
+    })
+    .catch((err) => {
+      console.log('Error: ', err);
+      res.status(500).send('Server error. Please check with administrator.');
+    });
+});
+
+//////////////
+// Loadings //
+//////////////
+app.get('/loadings-creation/:id', (req, res) => {
+  if (req.isUserLoggedIn) {
+    const userData = req.user;
+    // check if admin
+    if (req.user.super_user) {
+      const insert = req.params.id;
+      const scheduleQuery =
+        'SELECT vessel_schedule.id, vessel_name.id AS vessel_name_id ,vessel_name.vessel_name, vessel_voyage.id AS voyage_number_id, vessel_voyage.voyage_number, service_name.service_name, port_name.port_code, vessel_schedule.eta, vessel_schedule.etd FROM vessel_schedule INNER JOIN vessel_name ON vessel_schedule.vessel_name = vessel_name.id INNER JOIN vessel_voyage ON vessel_schedule.voyage_number = vessel_voyage.id INNER JOIN service_name ON vessel_schedule.service_name = service_name.id INNER JOIN port_name ON vessel_schedule.port_name = port_name.id ';
+      pool
+        .query(scheduleQuery)
+        .then((result) => {
+          const scheduleData = result.rows;
+          const customerListQuery = 'SELECT * FROM customers';
+          return pool.query(customerListQuery).then((result) => {
+            const customerData = result.rows;
+            res.render('loadings-creation-form', {
+              scheduleData,
+              userData,
+              customerData,
+            });
+          });
+        })
+        .catch((err) => {
+          console.log('Error: ', err);
+          res
+            .status(500)
+            .send('Server error. Please check with administrator.');
+        });
+    } else {
+      res.redirect('/');
+    }
+    // if not admin but logged in
+  } else {
+    res.redirect('/');
+  }
+});
+app.post('/loadings-creation', (req, res) => {
+  // input into loading_
+  const input = [req.body.customer_name, req.body.op_code];
+  const inputEdit = input.map((x) => {
+    return x.toUpperCase().trim();
+  });
+  console.log(inputEdit);
+  const insertQuery =
+    'INSERT INTO customers(customer_name, op_code) VALUES($1, $2)';
+  pool
+    .query(insertQuery, inputEdit)
+    .then(() => {
+      console.log('Customer inserted successfully.');
       res.redirect('/customer-creation');
     })
     .catch((err) => {
