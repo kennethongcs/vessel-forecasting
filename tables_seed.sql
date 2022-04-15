@@ -1,5 +1,6 @@
 INSERT INTO accounts (user_name, password, origin_country, super_user) VALUES ('admin', '3627909a29c31381a071ec27f7c9ca97726182aed29a7ddd2e54353322cfb30abb9e3a6df2ac2c20fe23436311d678564d0c8d305930575f60e2d3d048184d79', 1, 1);
 INSERT INTO accounts (user_name, password, origin_country, super_user) VALUES ('user1', '3627909a29c31381a071ec27f7c9ca97726182aed29a7ddd2e54353322cfb30abb9e3a6df2ac2c20fe23436311d678564d0c8d305930575f60e2d3d048184d79', 1, 0);
+INSERT INTO accounts (user_name, password, origin_country, super_user) VALUES ('thl1', '3627909a29c31381a071ec27f7c9ca97726182aed29a7ddd2e54353322cfb30abb9e3a6df2ac2c20fe23436311d678564d0c8d305930575f60e2d3d048184d79', 6, 0);
 
 INSERT INTO country (country_name) VALUES ('SINGAPORE');
 INSERT INTO country (country_name) VALUES ('MALAYSIA');
@@ -12,10 +13,11 @@ INSERT INTO service_name (service_name) VALUES ('BKX3');
 INSERT INTO service_name (service_name) VALUES ('BKX1');
 INSERT INTO service_name (service_name) VALUES ('SGX');
 
-INSERT INTO port_name (port_name, port_code) VALUES ('LAEMCHABANG', 'THLCH');
-INSERT INTO port_name (port_name, port_code) VALUES ('BANGKOK', 'THBKK');
-INSERT INTO port_name (port_name, port_code) VALUES ('SONGKLA', 'THSGZ');
-INSERT INTO port_name (port_name, port_code) VALUES ('KUANTAN', 'MYKUA');
+INSERT INTO port_name (port_name, port_code, origin_country) VALUES ('LAEMCHABANG', 'THLCH', 6);
+INSERT INTO port_name (port_name, port_code, origin_country) VALUES ('BANGKOK', 'THBKK', 6);
+INSERT INTO port_name (port_name, port_code, origin_country) VALUES ('SONGKLA', 'THSGZ', 6);
+INSERT INTO port_name (port_name, port_code, origin_country) VALUES ('KUANTAN', 'MYKUA', 2);
+INSERT INTO port_name (port_name, port_code, origin_country) VALUES ('SINGAPORE', 'SGSIN', 1);
 
 INSERT INTO vessel_name (vessel_name, TEU, TONS) VALUES ('SINAR BINTAN', 893, 12500);
 INSERT INTO vessel_name (vessel_name, TEU, TONS) VALUES ('SINAR BANDUNG', 893, 12500);
