@@ -20,17 +20,13 @@ CREATE TABLE IF NOT EXISTS loadings (
     vessel_name INTEGER,
     voyage_number INTEGER,
     user_name INTEGER,
-    pol VARCHAR(5),
-    pod VARCHAR(5),
-    date DATE NOT NULL DEFAULT NOW(),
-    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-  );
-
-CREATE TABLE IF NOT EXISTS loading_containers (
-    id SERIAL NOT NULL PRIMARY KEY,
     container_size INTEGER,
     container_type INTEGER,
     amt_of_containers INTEGER,
+    container_tonnage INTEGER,
+    pol INTEGER,
+    pod INTEGER,
+    date DATE NOT NULL DEFAULT NOW(),
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
   );
 
@@ -83,7 +79,8 @@ CREATE TABLE IF NOT EXISTS service_name (
 CREATE TABLE IF NOT EXISTS port_name (
     id SERIAL NOT NULL PRIMARY KEY,
     port_name TEXT,
-    port_code VARCHAR(5)
+    port_code VARCHAR(5),
+    origin_country INTEGER
  );
  
 CREATE TABLE IF NOT EXISTS vessel_alloc_at_port (
