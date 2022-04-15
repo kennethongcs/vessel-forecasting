@@ -4,9 +4,148 @@
   <body>
     <main class="container mt-4">
       <div class="row">
-        <div class="col-3 border-dark border-right" style="min-height: 540px">
-          <form action="/loadings-creation"></form>
+        <div class="col-4 border-dark border-right" style="min-height: 540px">
+          <form action="/loadings-creation" method="POST">
+            <div class="form-group">
+              <label for="customer_name">Customer Name:</label>
+              <select
+                name="customer_name"
+                id="customer_name"
+                class="form-control"
+              >
+                <% data.customerData.forEach(element => { %>
+                <option value="<%= element.id %>">
+                  <%= element.customer_name %>
+                </option>
+                <% }) %>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="container_size">Container Size:</label>
+              <select
+                name="container_size"
+                id="container_size"
+                class="form-control"
+              >
+                <% data.containerSizes.forEach(element => { %>
+                <option value="<%= element.id %> "><%= element.size %></option>
+                <% }) %>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="container_type">Container Type:</label>
+              <select
+                name="container_type"
+                id="container_type"
+                class="form-control"
+              >
+                <% data.containerTypes.forEach(element => { %>
+                <option value="<%= element.id %> "><%= element.type %></option>
+                <% }) %>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="pol">POL:</label>
+              <input
+                type="text"
+                name="pol"
+                id="pol"
+                value="<%= data.scheduleData.port_id %>"
+                hidden
+              />
+              <input
+                type="text"
+                class="form-control"
+                value="<%= data.scheduleData.port_code %>"
+                readonly="readonly"
+              />
+            </div>
+            <div class="form-group">
+              <label for="pod">POD:</label>
+              <select name="pod" id="pod" class="form-control">
+                <% data.port.forEach(element => { %>
+                <option value="<%= element.id %> ">
+                  <%= element.port_code %>
+                </option>
+                <% }) %>
+              </select>
+              
+            <div class="form-group">
+              <label for="amt_of_containers">Amount of Containers:</label>
+              <input
+                type="number"
+                name="amt_of_containers"
+                id="amt_of_containers"
+                class="form-control"
+              />
+            </div>
+            <div class="form-group">
+              <label for="container_tonnage"
+                >Total tonnage of containers:</label
+              >
+              <input
+                type="number"
+                name="container_tonnage"
+                id="container_tonnage"
+                class="form-control"
+              />
+            </div>
+            <div>
+              <input
+                type="text"
+                name="vessel_name"
+                id="vessel_name"
+                value="<%= data.scheduleData.vessel_name_id %>"
+                hidden
+              />
+            </div>
+            <div>
+              <input
+                type="text"
+                name="vessel_voyage"
+                id="vessel_voyage"
+                value="<%= data.scheduleData.voyage_number_id %>"
+                hidden
+              />
+            </div>
+            <div>
+              <input
+                type="number"
+                name="user_name"
+                id="user_name"
+                value="<%= userData.id %>"
+                hidden
+              />
+            </div>
+            <input class="btn btn-success" type="submit" value="Submit" />
+          </form>
         </div>
+      </div>
+      <div class="col-8" =>
+        <table class="table-hover table-bordered mt-4 text-center" style="min-width: 400px"> 
+          <thead>
+            <tr>
+              <th>Cust</th>
+              <th>Size</th>
+              <th>Type</th>
+              <th>Amt</th>
+              <th>Ton</th>
+              <th>POD</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% data.loadings.forEach(element => { %>
+             <tr>
+               <td><%= element.customer_name %></td>
+               <td><%= element.size %></td>
+               <td><%= element.type %></td>
+               <td><%= element.amt_of_containers %></td>
+                <td><%= element.container_tonnage %></td>
+               <td><%= element.pod %></td>
+             </tr>
+            <% }) %>
+          </tbody>
+        </table>
       </div>
     </main>
   </body>
