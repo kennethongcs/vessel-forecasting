@@ -79,7 +79,10 @@ app.listen(port, () => {
   console.log(`Server is up, listening on port ${port}.`);
 });
 
-// index page DOING
+///////////
+// index // DOING
+///////////
+
 app.get('/', (req, res) => {
   // if user is not logged in redirect to login page
   if (!req.isUserLoggedIn) {
@@ -89,17 +92,33 @@ app.get('/', (req, res) => {
   // if user is logged in, redirect to index
   if (req.isUserLoggedIn) {
     const userData = req.user;
-    const scheduleQuery =
-      'SELECT vessel_schedule.id, vessel_name.id AS vessel_name_id ,vessel_name.vessel_name, vessel_voyage.id AS voyage_number_id, vessel_voyage.voyage_number, service_name.service_name, port_name.port_code, vessel_schedule.eta, vessel_schedule.etd FROM vessel_schedule INNER JOIN vessel_name ON vessel_schedule.vessel_name = vessel_name.id INNER JOIN vessel_voyage ON vessel_schedule.voyage_number = vessel_voyage.id INNER JOIN service_name ON vessel_schedule.service_name = service_name.id INNER JOIN port_name ON vessel_schedule.port_name = port_name.id';
-    pool.query(scheduleQuery).then((result) => {
-      const data = result.rows;
-      // convert db date using moment
-      Object.values(data).forEach((x) => {
-        x.eta = moment(x.eta).format('DD/MMM/YY');
-        x.etd = moment(x.etd).format('DD/MMM/YY');
+    if (req.user.super_user) {
+      const scheduleQuery =
+        'SELECT vessel_schedule.id, vessel_name.id AS vessel_name_id ,vessel_name.vessel_name, vessel_voyage.id AS voyage_number_id, vessel_voyage.voyage_number, service_name.service_name, port_name.port_code, vessel_schedule.eta, vessel_schedule.etd FROM vessel_schedule INNER JOIN vessel_name ON vessel_schedule.vessel_name = vessel_name.id INNER JOIN vessel_voyage ON vessel_schedule.voyage_number = vessel_voyage.id INNER JOIN service_name ON vessel_schedule.service_name = service_name.id INNER JOIN port_name ON vessel_schedule.port_name = port_name.id';
+      pool.query(scheduleQuery).then((result) => {
+        const data = result.rows;
+        // convert db date using moment
+        Object.values(data).forEach((x) => {
+          x.eta = moment(x.eta).format('DD/MMM/YY');
+          x.etd = moment(x.etd).format('DD/MMM/YY');
+        });
+        res.render('index', { userData, data });
       });
-      res.render('index', { userData, data });
-    });
+    } else {
+      // if not super user, then only show vessels that has that country's port code
+      const originCountry = [userData.origin_country];
+      const scheduleQuery =
+        'SELECT vessel_schedule.id, vessel_name.id AS vessel_name_id ,vessel_name.vessel_name, vessel_voyage.id AS voyage_number_id, vessel_voyage.voyage_number, service_name.service_name, port_name.port_code, country.id AS country_id, vessel_schedule.eta, vessel_schedule.etd FROM vessel_schedule INNER JOIN vessel_name ON vessel_schedule.vessel_name = vessel_name.id INNER JOIN vessel_voyage ON vessel_schedule.voyage_number = vessel_voyage.id INNER JOIN service_name ON vessel_schedule.service_name = service_name.id INNER JOIN port_name ON vessel_schedule.port_name = port_name.id INNER JOIN country ON country.id = port_name.origin_country WHERE country.id = $1';
+      pool.query(scheduleQuery, originCountry).then((result) => {
+        const data = result.rows;
+        // convert db date using moment
+        Object.values(data).forEach((x) => {
+          x.eta = moment(x.eta).format('DD/MMM/YY');
+          x.etd = moment(x.etd).format('DD/MMM/YY');
+        });
+        res.render('index', { userData, data });
+      });
+    }
   }
 });
 
@@ -806,7 +825,6 @@ app.post('/schedule-creation', (req, res) => {
     req.body.eta,
     req.body.etd,
   ];
-  console.log(input);
   const insertQuery =
     'INSERT INTO vessel_schedule(vessel_name, voyage_number, service_name, port_name, eta, etd) VALUES($1, $2, $3, $4, $5, $6)';
   pool
@@ -991,21 +1009,44 @@ app.get('/loadings-creation/:id', (req, res) => {
     const userData = req.user;
     // check if admin
     if (req.user.super_user) {
-      const insert = req.params.id;
+      const data = {};
+      const insert = [req.params.id];
       const scheduleQuery =
-        'SELECT vessel_schedule.id, vessel_name.id AS vessel_name_id ,vessel_name.vessel_name, vessel_voyage.id AS voyage_number_id, vessel_voyage.voyage_number, service_name.service_name, port_name.port_code, vessel_schedule.eta, vessel_schedule.etd FROM vessel_schedule INNER JOIN vessel_name ON vessel_schedule.vessel_name = vessel_name.id INNER JOIN vessel_voyage ON vessel_schedule.voyage_number = vessel_voyage.id INNER JOIN service_name ON vessel_schedule.service_name = service_name.id INNER JOIN port_name ON vessel_schedule.port_name = port_name.id ';
+        'SELECT vessel_schedule.id, vessel_name.id AS vessel_name_id ,vessel_name.vessel_name, vessel_voyage.id AS voyage_number_id, vessel_voyage.voyage_number, service_name.service_name, port_name.id AS port_id, port_name.port_code, vessel_schedule.eta, vessel_schedule.etd FROM vessel_schedule INNER JOIN vessel_name ON vessel_schedule.vessel_name = vessel_name.id INNER JOIN vessel_voyage ON vessel_schedule.voyage_number = vessel_voyage.id INNER JOIN service_name ON vessel_schedule.service_name = service_name.id INNER JOIN port_name ON vessel_schedule.port_name = port_name.id WHERE vessel_voyage.id = $1';
       pool
-        .query(scheduleQuery)
+        .query(scheduleQuery, insert)
         .then((result) => {
-          const scheduleData = result.rows;
+          data.scheduleData = result.rows[0];
           const customerListQuery = 'SELECT * FROM customers';
-          return pool.query(customerListQuery).then((result) => {
-            const customerData = result.rows;
-            res.render('loadings-creation-form', {
-              scheduleData,
-              userData,
-              customerData,
-            });
+          return pool.query(customerListQuery);
+        })
+        .then((result) => {
+          data.customerData = result.rows;
+          const containerSizes = 'SELECT * FROM container_sizes';
+          return pool.query(containerSizes);
+        })
+        .then((result) => {
+          data.containerSizes = result.rows;
+          const containerTypes = 'SELECT * FROM container_types';
+          return pool.query(containerTypes);
+        })
+        .then((result) => {
+          data.containerTypes = result.rows;
+          const loadingsQuery =
+            'SELECT loadings.id, customers.customer_name, container_sizes.size, container_types.type, loadings.amt_of_containers, loadings.container_tonnage, port_name.port_code AS pod FROM loadings INNER JOIN customers ON loadings.customer_name = customers.id INNER JOIN vessel_name ON loadings.vessel_name = vessel_name.id INNER JOIN vessel_voyage ON loadings.voyage_number = vessel_voyage.id INNER JOIN container_sizes ON loadings.container_size = container_sizes.id INNER JOIN container_types ON loadings.container_type = container_types.id INNER JOIN port_name ON loadings.pod = port_name.id';
+          return pool.query(loadingsQuery);
+        })
+        .then((result) => {
+          data.loadings = result.rows;
+          const portQuery = 'SELECT * FROM port_name';
+          return pool.query(portQuery);
+        })
+        .then((result) => {
+          data.port = result.rows;
+          // console.log(data);
+          res.render('loadings-creation-form', {
+            data,
+            userData,
           });
         })
         .catch((err) => {
@@ -1015,27 +1056,85 @@ app.get('/loadings-creation/:id', (req, res) => {
             .send('Server error. Please check with administrator.');
         });
     } else {
-      res.redirect('/');
+      // if not admin but logged in DOING
+      const data = {};
+      const insert = [req.params.id];
+      const scheduleQuery =
+        'SELECT vessel_schedule.id, vessel_name.id AS vessel_name_id ,vessel_name.vessel_name, vessel_voyage.id AS voyage_number_id, vessel_voyage.voyage_number, service_name.service_name, port_name.id AS port_id, port_name.port_code, vessel_schedule.eta, vessel_schedule.etd, port_name.origin_country FROM vessel_schedule INNER JOIN vessel_name ON vessel_schedule.vessel_name = vessel_name.id INNER JOIN vessel_voyage ON vessel_schedule.voyage_number = vessel_voyage.id INNER JOIN service_name ON vessel_schedule.service_name = service_name.id INNER JOIN port_name ON vessel_schedule.port_name = port_name.id WHERE vessel_voyage.id = $1';
+      pool
+        .query(scheduleQuery, insert)
+        .then((result) => {
+          data.scheduleData = result.rows[0];
+          if (req.user.origin_country !== data.scheduleData.origin_country) {
+            res.redirect('/');
+          }
+          const customerListQuery = 'SELECT * FROM customers';
+          return pool.query(customerListQuery);
+        })
+        .then((result) => {
+          data.customerData = result.rows;
+          const containerSizes = 'SELECT * FROM container_sizes';
+          return pool.query(containerSizes);
+        })
+        .then((result) => {
+          data.containerSizes = result.rows;
+          const containerTypes = 'SELECT * FROM container_types';
+          return pool.query(containerTypes);
+        })
+        .then((result) => {
+          data.containerTypes = result.rows;
+          const loadingsQuery =
+            'SELECT loadings.id, customers.customer_name, container_sizes.size, container_types.type, loadings.amt_of_containers, loadings.container_tonnage, port_name.port_code AS pod FROM loadings INNER JOIN customers ON loadings.customer_name = customers.id INNER JOIN vessel_name ON loadings.vessel_name = vessel_name.id INNER JOIN vessel_voyage ON loadings.voyage_number = vessel_voyage.id INNER JOIN container_sizes ON loadings.container_size = container_sizes.id INNER JOIN container_types ON loadings.container_type = container_types.id INNER JOIN port_name ON loadings.pod = port_name.id';
+          return pool.query(loadingsQuery);
+        })
+        .then((result) => {
+          data.loadings = result.rows;
+          const portQuery = 'SELECT * FROM port_name';
+          return pool.query(portQuery);
+        })
+        .then((result) => {
+          data.port = result.rows;
+          // console.log(data);
+          res.render('loadings-creation-form', {
+            data,
+            userData,
+          });
+        })
+        .catch((err) => {
+          console.log('Error: ', err);
+          res
+            .status(500)
+            .send('Server error. Please check with administrator.');
+        });
     }
-    // if not admin but logged in
   } else {
     res.redirect('/');
   }
 });
 app.post('/loadings-creation', (req, res) => {
   // input into loading_
-  const input = [req.body.customer_name, req.body.op_code];
+  const input = [
+    req.body.customer_name,
+    req.body.vessel_name,
+    req.body.vessel_voyage,
+    req.body.user_name,
+    req.body.container_size,
+    req.body.container_type,
+    req.body.amt_of_containers,
+    req.body.container_tonnage,
+    req.body.pol,
+    req.body.pod,
+  ];
   const inputEdit = input.map((x) => {
     return x.toUpperCase().trim();
   });
-  console.log(inputEdit);
   const insertQuery =
-    'INSERT INTO customers(customer_name, op_code) VALUES($1, $2)';
+    'INSERT INTO loadings(customer_name, vessel_name, voyage_number, user_name, container_size, container_type, amt_of_containers, container_tonnage, pol, pod) VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)';
   pool
     .query(insertQuery, inputEdit)
     .then(() => {
-      console.log('Customer inserted successfully.');
-      res.redirect('/customer-creation');
+      console.log('Loadings inserted successfully.');
+      res.redirect('/');
     })
     .catch((err) => {
       console.log('Error: ', err);
