@@ -15,7 +15,7 @@
               >
                 <% data.customerData.forEach(element => { %>
                 <option value="<%= element.id %>">
-                  <%= element.customer_name %>
+                  <%= element.op_code %>
                 </option>
                 <% }) %>
               </select>
@@ -69,7 +69,7 @@
                 </option>
                 <% }) %>
               </select>
-              
+            </div>
             <div class="form-group">
               <label for="amt_of_containers">Amount of Containers:</label>
               <input
@@ -120,32 +120,35 @@
             <input class="btn btn-success" type="submit" value="Submit" />
           </form>
         </div>
-      </div>
-      <div class="col-8" =>
-        <table class="table-hover table-bordered mt-4 text-center" style="min-width: 400px"> 
-          <thead>
-            <tr>
-              <th>Cust</th>
-              <th>Size</th>
-              <th>Type</th>
-              <th>Amt</th>
-              <th>Ton</th>
-              <th>POD</th>
-            </tr>
-          </thead>
-          <tbody>
-            <% data.loadings.forEach(element => { %>
-             <tr>
-               <td><%= element.customer_name %></td>
-               <td><%= element.size %></td>
-               <td><%= element.type %></td>
-               <td><%= element.amt_of_containers %></td>
+        <div class="col-8">
+          <table
+            class="table-hover table-bordered mt-4 text-center"
+            style="min-width: 400px"
+          >
+            <thead>
+              <tr>
+                <th>Cust</th>
+                <th>Size</th>
+                <th>Type</th>
+                <th>Amt</th>
+                <th>Ton</th>
+                <th>POD</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% data.loadings.forEach(element => { %>
+              <tr>
+                <td><%= element.op_code %></td>
+                <td><%= element.size %></td>
+                <td><%= element.type %></td>
+                <td><%= element.amt_of_containers %></td>
                 <td><%= element.container_tonnage %></td>
-               <td><%= element.pod %></td>
-             </tr>
-            <% }) %>
-          </tbody>
-        </table>
+                <td><%= element.pod %></td>
+              </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
       </div>
     </main>
   </body>
