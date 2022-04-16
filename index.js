@@ -132,7 +132,6 @@ app.get('/', (req, res) => {
               }, new Map())
               .values()
           );
-          console.log(reduce);
           data.balanceLoadings = reduce;
           // convert db date using moment
           Object.values(data.schedule).forEach((x) => {
