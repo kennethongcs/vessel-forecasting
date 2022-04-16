@@ -16,24 +16,35 @@
             <th>Port Code</th>
             <th>ETA</th>
             <th>ETD</th>
+            <th>Bal. TEU</th>
+            <th>Bal. Tons</th>
           </tr>
         </thead>
         <tbody>
-          <% data.forEach((element, i) => { %>
+          <% for( let i = 0; i < data.schedule.length; i++ ) { %>
           <tr>
             <td><%= i + 1 %></td>
             <td>
-              <a href="/loadings-creation/<%= element.voyage_number_id %> "
-                ><%= element.vessel_name %></a
+              <a
+                href="/loadings-creation/<%= data.schedule[i].voyage_number_id %> "
+                ><%= data.schedule[i].vessel_name %></a
               >
             </td>
-            <td><%= element.voyage_number %></td>
-            <td><%= element.service_name %></td>
-            <td><%= element.port_code %></td>
-            <td><%= element.eta %></td>
-            <td><%= element.etd %></td>
+            <td><%= data.schedule[i].voyage_number %></td>
+            <td><%= data.schedule[i].service_name %></td>
+            <td><%= data.schedule[i].port_code %></td>
+            <td><%= data.schedule[i].eta %></td>
+            <td><%= data.schedule[i].etd %></td>
+            <td>
+              <%= data.balanceLoadings[i].teu_alloc -
+              data.balanceLoadings[i].amt_of_containers %>
+            </td>
+            <td>
+              <%= data.balanceLoadings[i].tons_alloc -
+              data.balanceLoadings[i].container_tonnage %>
+            </td>
           </tr>
-          <% }) %>
+          <% } %>
         </tbody>
       </table>
     </main>
