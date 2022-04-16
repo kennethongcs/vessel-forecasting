@@ -107,7 +107,7 @@ app.get('/', (req, res) => {
         .then((result) => {
           data.schedule = result.rows;
           const balanceAtPortQuery =
-            'SELECT loadings.vessel_name, loadings.voyage_number, loadings.pol, vessel_alloc_at_port.teu AS teu_alloc, vessel_alloc_at_port.tons AS tons_alloc, loadings.amt_of_containers, loadings.container_tonnage FROM loadings INNER JOIN vessel_alloc_at_port ON loadings.pol = vessel_alloc_at_port.port_name AND loadings.vessel_name = vessel_alloc_at_port.vessel_name';
+            'SELECT loadings.vessel_name, loadings.voyage_number, loadings.pol, vessel_alloc_at_port.teu AS teu_alloc, vessel_alloc_at_port.tons AS tons_alloc, loadings.amt_of_containers, loadings.container_tonnage FROM loadings INNER JOIN vessel_alloc_at_port ON loadings.pol = vessel_alloc_at_port.port_name AND loadings.vessel_name = vessel_alloc_at_port.vessel_name ';
           return pool.query(balanceAtPortQuery);
         })
         .then((result) => {
@@ -132,6 +132,7 @@ app.get('/', (req, res) => {
               }, new Map())
               .values()
           );
+          console.log(reduce);
           data.balanceLoadings = reduce;
           // convert db date using moment
           Object.values(data.schedule).forEach((x) => {
@@ -151,8 +152,8 @@ app.get('/', (req, res) => {
         .then((result) => {
           data.schedule = result.rows;
           const balanceAtPortQuery =
-            'SELECT loadings.vessel_name, loadings.voyage_number, loadings.pol, vessel_alloc_at_port.teu AS teu_alloc, vessel_alloc_at_port.tons AS tons_alloc, loadings.amt_of_containers, loadings.container_tonnage FROM loadings INNER JOIN vessel_alloc_at_port ON loadings.pol = vessel_alloc_at_port.port_name AND loadings.vessel_name = vessel_alloc_at_port.vessel_name';
-          return pool.query(balanceAtPortQuery);
+            'SELECT loadings.vessel_name, loadings.voyage_number, loadings.pol, vessel_alloc_at_port.teu AS teu_alloc, vessel_alloc_at_port.tons AS tons_alloc, loadings.amt_of_containers, loadings.container_tonnage FROM loadings INNER JOIN vessel_alloc_at_port ON loadings.pol = vessel_alloc_at_port.port_name AND loadings.vessel_name = vessel_alloc_at_port.vessel_name WHERE vessel_alloc_at_port.country_name = $1';
+          return pool.query(balanceAtPortQuery, originCountry);
         })
         .then((result) => {
           const loadData = result.rows;
@@ -176,6 +177,7 @@ app.get('/', (req, res) => {
               }, new Map())
               .values()
           );
+          console.log(reduce);
           data.balanceLoadings = reduce;
           // convert db date using moment
           Object.values(data.schedule).forEach((x) => {
@@ -1152,8 +1154,8 @@ app.get('/loadings-creation/:id', (req, res) => {
         .then((result) => {
           data.containerTypes = result.rows;
           const loadingsQuery =
-            'SELECT loadings.id, customers.op_code, container_sizes.size, container_types.type, loadings.amt_of_containers, loadings.container_tonnage, port_name.port_code AS pod FROM loadings INNER JOIN customers ON loadings.customer_name = customers.id INNER JOIN vessel_name ON loadings.vessel_name = vessel_name.id INNER JOIN vessel_voyage ON loadings.voyage_number = vessel_voyage.id INNER JOIN container_sizes ON loadings.container_size = container_sizes.id INNER JOIN container_types ON loadings.container_type = container_types.id INNER JOIN port_name ON loadings.pod = port_name.id';
-          return pool.query(loadingsQuery);
+            'SELECT loadings.id, customers.op_code, container_sizes.size, container_types.type, loadings.amt_of_containers, loadings.container_tonnage, port_name.port_code AS pod FROM loadings INNER JOIN customers ON loadings.customer_name = customers.id INNER JOIN vessel_name ON loadings.vessel_name = vessel_name.id INNER JOIN vessel_voyage ON loadings.voyage_number = vessel_voyage.id INNER JOIN container_sizes ON loadings.container_size = container_sizes.id INNER JOIN container_types ON loadings.container_type = container_types.id INNER JOIN port_name ON loadings.pod = port_name.id WHERE loadings.voyage_number = $1';
+          return pool.query(loadingsQuery, insert);
         })
         .then((result) => {
           data.loadings = result.rows;
