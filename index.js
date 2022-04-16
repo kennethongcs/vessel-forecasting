@@ -92,18 +92,58 @@ app.get('/', (req, res) => {
   // if user is logged in, redirect to index
   if (req.isUserLoggedIn) {
     const userData = req.user;
+    let vesselAllocation = {};
+    const data = {};
+    const balLoadingsQuery = 'SELECT * FROM vessel_alloc_at_port';
+    pool.query(balLoadingsQuery).then((result) => {
+      const data = result.rows;
+      vesselAllocation = { data };
+    });
     if (req.user.super_user) {
       const scheduleQuery =
         'SELECT vessel_schedule.id, vessel_name.id AS vessel_name_id ,vessel_name.vessel_name, vessel_voyage.id AS voyage_number_id, vessel_voyage.voyage_number, service_name.service_name, port_name.port_code, vessel_schedule.eta, vessel_schedule.etd FROM vessel_schedule INNER JOIN vessel_name ON vessel_schedule.vessel_name = vessel_name.id INNER JOIN vessel_voyage ON vessel_schedule.voyage_number = vessel_voyage.id INNER JOIN service_name ON vessel_schedule.service_name = service_name.id INNER JOIN port_name ON vessel_schedule.port_name = port_name.id';
-      pool.query(scheduleQuery).then((result) => {
-        const data = result.rows;
-        // convert db date using moment
-        Object.values(data).forEach((x) => {
-          x.eta = moment(x.eta).format('DD/MMM/YY');
-          x.etd = moment(x.etd).format('DD/MMM/YY');
+      pool
+        .query(scheduleQuery)
+        .then((result) => {
+          data.schedule = result.rows;
+          const balanceAtPortQuery =
+            'SELECT loadings.vessel_name, loadings.voyage_number, loadings.pol, vessel_alloc_at_port.teu AS teu_alloc, vessel_alloc_at_port.tons AS tons_alloc, loadings.amt_of_containers, loadings.container_tonnage FROM loadings INNER JOIN vessel_alloc_at_port ON loadings.pol = vessel_alloc_at_port.port_name AND loadings.vessel_name = vessel_alloc_at_port.vessel_name';
+          return pool.query(balanceAtPortQuery);
+        })
+        .then((result) => {
+          const loadData = result.rows;
+          // BUG
+
+          const reduce = Array.from(
+            // take out amt_of_containers key
+            loadData
+              .reduce((acc, { amt_of_containers, container_tonnage, ...r }) => {
+                const key = JSON.stringify(r);
+                const current = acc.get(key) || {
+                  ...r,
+                  amt_of_containers: 0,
+                  container_tonnage: 0,
+                };
+                return acc.set(key, {
+                  ...current,
+                  amt_of_containers:
+                    current.amt_of_containers + amt_of_containers,
+                  container_tonnage:
+                    current.container_tonnage + container_tonnage,
+                });
+              }, new Map())
+              .values()
+          );
+          data.balanceLoadings = reduce;
+          Object.values(loadData).forEach((x) => {});
+          // console.log(loadData);
+          // convert db date using moment
+          Object.values(data.schedule).forEach((x) => {
+            x.eta = moment(x.eta).format('DD/MMM/YY');
+            x.etd = moment(x.etd).format('DD/MMM/YY');
+          });
+          res.render('index', { userData, data });
         });
-        res.render('index', { userData, data });
-      });
     } else {
       // if not super user, then only show vessels that has that country's port code
       const originCountry = [userData.origin_country];
@@ -937,14 +977,13 @@ app.post('/customer-creation', (req, res) => {
   const inputEdit = input.map((x) => {
     return x.toUpperCase().trim();
   });
-  console.log(inputEdit);
   const insertQuery =
     'INSERT INTO customers(customer_name, op_code) VALUES($1, $2)';
   pool
     .query(insertQuery, inputEdit)
     .then(() => {
       console.log('Customer inserted successfully.');
-      res.redirect('/customer-creation');
+      res.redirect('back');
     })
     .catch((err) => {
       console.log('Error: ', err);
@@ -1032,9 +1071,10 @@ app.get('/loadings-creation/:id', (req, res) => {
         })
         .then((result) => {
           data.containerTypes = result.rows;
+          const insert = [req.params.id];
           const loadingsQuery =
-            'SELECT loadings.id, customers.customer_name, container_sizes.size, container_types.type, loadings.amt_of_containers, loadings.container_tonnage, port_name.port_code AS pod FROM loadings INNER JOIN customers ON loadings.customer_name = customers.id INNER JOIN vessel_name ON loadings.vessel_name = vessel_name.id INNER JOIN vessel_voyage ON loadings.voyage_number = vessel_voyage.id INNER JOIN container_sizes ON loadings.container_size = container_sizes.id INNER JOIN container_types ON loadings.container_type = container_types.id INNER JOIN port_name ON loadings.pod = port_name.id';
-          return pool.query(loadingsQuery);
+            'SELECT loadings.voyage_number, loadings.id, customers.customer_name, container_sizes.size, container_types.type, loadings.amt_of_containers, loadings.container_tonnage, port_name.port_code AS pod FROM loadings INNER JOIN customers ON loadings.customer_name = customers.id INNER JOIN vessel_name ON loadings.vessel_name = vessel_name.id INNER JOIN vessel_voyage ON loadings.voyage_number = vessel_voyage.id INNER JOIN container_sizes ON loadings.container_size = container_sizes.id INNER JOIN container_types ON loadings.container_type = container_types.id INNER JOIN port_name ON loadings.pod = port_name.id WHERE loadings.voyage_number = $1';
+          return pool.query(loadingsQuery, insert);
         })
         .then((result) => {
           data.loadings = result.rows;
@@ -1066,7 +1106,9 @@ app.get('/loadings-creation/:id', (req, res) => {
         .then((result) => {
           data.scheduleData = result.rows[0];
           if (req.user.origin_country !== data.scheduleData.origin_country) {
+            // BUG
             res.redirect('/');
+            // return
           }
           const customerListQuery = 'SELECT * FROM customers';
           return pool.query(customerListQuery);
@@ -1134,7 +1176,7 @@ app.post('/loadings-creation', (req, res) => {
     .query(insertQuery, inputEdit)
     .then(() => {
       console.log('Loadings inserted successfully.');
-      res.redirect('/');
+      res.redirect('back');
     })
     .catch((err) => {
       console.log('Error: ', err);
