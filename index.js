@@ -1099,7 +1099,7 @@ app.get('/loadings-creation/:id', (req, res) => {
           data.containerTypes = result.rows;
           const insert = [req.params.id];
           const loadingsQuery =
-            'SELECT loadings.voyage_number, loadings.id, customers.customer_name, container_sizes.size, container_types.type, loadings.amt_of_containers, loadings.container_tonnage, port_name.port_code AS pod FROM loadings INNER JOIN customers ON loadings.customer_name = customers.id INNER JOIN vessel_name ON loadings.vessel_name = vessel_name.id INNER JOIN vessel_voyage ON loadings.voyage_number = vessel_voyage.id INNER JOIN container_sizes ON loadings.container_size = container_sizes.id INNER JOIN container_types ON loadings.container_type = container_types.id INNER JOIN port_name ON loadings.pod = port_name.id WHERE loadings.voyage_number = $1';
+            'SELECT loadings.voyage_number, loadings.id, customers.op_code, container_sizes.size, container_types.type, loadings.amt_of_containers, loadings.container_tonnage, port_name.port_code AS pod FROM loadings INNER JOIN customers ON loadings.customer_name = customers.id INNER JOIN vessel_name ON loadings.vessel_name = vessel_name.id INNER JOIN vessel_voyage ON loadings.voyage_number = vessel_voyage.id INNER JOIN container_sizes ON loadings.container_size = container_sizes.id INNER JOIN container_types ON loadings.container_type = container_types.id INNER JOIN port_name ON loadings.pod = port_name.id WHERE loadings.voyage_number = $1';
           return pool.query(loadingsQuery, insert);
         })
         .then((result) => {
@@ -1152,7 +1152,7 @@ app.get('/loadings-creation/:id', (req, res) => {
         .then((result) => {
           data.containerTypes = result.rows;
           const loadingsQuery =
-            'SELECT loadings.id, customers.customer_name, container_sizes.size, container_types.type, loadings.amt_of_containers, loadings.container_tonnage, port_name.port_code AS pod FROM loadings INNER JOIN customers ON loadings.customer_name = customers.id INNER JOIN vessel_name ON loadings.vessel_name = vessel_name.id INNER JOIN vessel_voyage ON loadings.voyage_number = vessel_voyage.id INNER JOIN container_sizes ON loadings.container_size = container_sizes.id INNER JOIN container_types ON loadings.container_type = container_types.id INNER JOIN port_name ON loadings.pod = port_name.id';
+            'SELECT loadings.id, customers.op_code, container_sizes.size, container_types.type, loadings.amt_of_containers, loadings.container_tonnage, port_name.port_code AS pod FROM loadings INNER JOIN customers ON loadings.customer_name = customers.id INNER JOIN vessel_name ON loadings.vessel_name = vessel_name.id INNER JOIN vessel_voyage ON loadings.voyage_number = vessel_voyage.id INNER JOIN container_sizes ON loadings.container_size = container_sizes.id INNER JOIN container_types ON loadings.container_type = container_types.id INNER JOIN port_name ON loadings.pod = port_name.id';
           return pool.query(loadingsQuery);
         })
         .then((result) => {
