@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 /* eslint-disable spaced-comment */
 import express, { urlencoded } from 'express';
 import pg from 'pg';
@@ -47,7 +48,7 @@ app.use((req, res, next) => {
       const values = [req.cookies.userId];
       // try to get the user
       pool.query(
-        'SELECT * FROM accounts WHERE user_name=$1',
+        'SELECT accounts.id AS user_id, accounts.user_name, country.country_name, accounts.super_user, accounts.origin_country FROM accounts INNER JOIN country ON accounts.origin_country = country.id WHERE user_name=$1',
         values,
         (error, result) => {
           if (error || result.rows.length < 1) {
@@ -80,7 +81,7 @@ app.listen(port, () => {
 });
 
 ///////////
-// index // DOING
+// index //
 ///////////
 
 app.get('/', (req, res) => {
@@ -101,15 +102,22 @@ app.get('/', (req, res) => {
     });
     if (req.user.super_user) {
       const scheduleQuery =
-        'SELECT vessel_schedule.id, vessel_name.id AS vessel_name_id ,vessel_name.vessel_name, vessel_voyage.id AS voyage_number_id, vessel_voyage.voyage_number, service_name.service_name, port_name.port_code, vessel_schedule.eta, vessel_schedule.etd FROM vessel_schedule INNER JOIN vessel_name ON vessel_schedule.vessel_name = vessel_name.id INNER JOIN vessel_voyage ON vessel_schedule.voyage_number = vessel_voyage.id INNER JOIN service_name ON vessel_schedule.service_name = service_name.id INNER JOIN port_name ON vessel_schedule.port_name = port_name.id';
+        'SELECT vessel_schedule.id, vessel_name.id AS vessel_name_id ,vessel_name.vessel_name, vessel_voyage.id AS voyage_number_id, vessel_voyage.voyage_number, service_name.service_name, port_name.port_code, vessel_schedule.eta, vessel_schedule.etd, VESSEL_alloc_at_port.teu AS teu_alloc, vessel_alloc_at_port.tons AS tons_alloc, loadings.amt_of_containers, loadings.container_tonnage FROM vessel_schedule INNER JOIN vessel_name ON vessel_schedule.vessel_name = vessel_name.id INNER JOIN vessel_voyage ON vessel_schedule.voyage_number = vessel_voyage.id INNER JOIN service_name ON vessel_schedule.service_name = service_name.id INNER JOIN port_name ON vessel_schedule.port_name = port_name.id INNER JOIN VESSEL_alloc_at_port ON vessel_schedule.port_name = vessel_alloc_at_port.port_name INNER JOIN loadings ON loadings.vessel_name = vessel_schedule.vessel_name AND loadings.vessel_name = vessel_alloc_at_port.vessel_name';
+
+      // inner join vessel_schedule, vessel_name, alloc and loadings
+      // eslint-disable-next-line max-len
+      // SELECT vessel_schedule.id, vessel_name.id AS vessel_name_id ,vessel_name.vessel_name, vessel_voyage.id AS voyage_number_id, vessel_voyage.voyage_number, service_name.service_name, port_name.port_code, vessel_schedule.eta, vessel_schedule.etd, VESSEL_alloc_at_port.teu AS teu_alloc, vessel_alloc_at_port.tons AS tons_alloc, loadings.amt_of_containers, loadings.container_tonnage FROM vessel_schedule INNER JOIN vessel_name ON vessel_schedule.vessel_name = vessel_name.id INNER JOIN vessel_voyage ON vessel_schedule.voyage_number = vessel_voyage.id INNER JOIN service_name ON vessel_schedule.service_name = service_name.id INNER JOIN port_name ON vessel_schedule.port_name = port_name.id INNER JOIN VESSEL_alloc_at_port ON vessel_schedule.port_name = vessel_alloc_at_port.port_name INNER JOIN loadings ON loadings.vessel_name = vessel_schedule.vessel_name AND loadings.vessel_name = vessel_alloc_at_port.vessel_name
+
+      // eslint-disable-next-line max-len
+      // SELECT vessel_schedule.id, vessel_name.id AS vessel_name_id ,vessel_name.vessel_name, vessel_voyage.id AS voyage_number_id, vessel_voyage.voyage_number, service_name.service_name, port_name.port_code, vessel_schedule.eta, vessel_schedule.etd FROM vessel_schedule INNER JOIN vessel_name ON vessel_schedule.vessel_name = vessel_name.id INNER JOIN vessel_voyage ON vessel_schedule.voyage_number = vessel_voyage.id INNER JOIN service_name ON vessel_schedule.service_name = service_name.id INNER JOIN port_name ON vessel_schedule.port_name = port_name.id
       pool
         .query(scheduleQuery)
-        .then((result) => {
-          data.schedule = result.rows;
-          const balanceAtPortQuery =
-            'SELECT loadings.vessel_name, loadings.voyage_number, loadings.pol, vessel_alloc_at_port.teu AS teu_alloc, vessel_alloc_at_port.tons AS tons_alloc, loadings.amt_of_containers, loadings.container_tonnage FROM loadings INNER JOIN vessel_alloc_at_port ON loadings.pol = vessel_alloc_at_port.port_name AND loadings.vessel_name = vessel_alloc_at_port.vessel_name ';
-          return pool.query(balanceAtPortQuery);
-        })
+        // .then((result) => {
+        //   data.schedule = result.rows;
+        //   const balanceAtPortQuery =
+        //     'SELECT loadings.vessel_name, loadings.voyage_number, loadings.pol, vessel_alloc_at_port.teu AS teu_alloc, vessel_alloc_at_port.tons AS tons_alloc, loadings.amt_of_containers, loadings.container_tonnage FROM loadings INNER JOIN vessel_alloc_at_port ON loadings.pol = vessel_alloc_at_port.port_name AND loadings.vessel_name = vessel_alloc_at_port.vessel_name ';
+        //   return pool.query(balanceAtPortQuery);
+        // })
         .then((result) => {
           const loadData = result.rows;
           const reduce = Array.from(
@@ -134,7 +142,7 @@ app.get('/', (req, res) => {
           );
           data.balanceLoadings = reduce;
           // convert db date using moment
-          Object.values(data.schedule).forEach((x) => {
+          Object.values(data.balanceLoadings).forEach((x) => {
             x.eta = moment(x.eta).format('DD/MMM/YY');
             x.etd = moment(x.etd).format('DD/MMM/YY');
           });
@@ -145,46 +153,38 @@ app.get('/', (req, res) => {
       const originCountry = [userData.origin_country];
       const data = {};
       const scheduleQuery =
-        'SELECT vessel_schedule.id, vessel_name.id AS vessel_name_id ,vessel_name.vessel_name, vessel_voyage.id AS voyage_number_id, vessel_voyage.voyage_number, service_name.service_name, port_name.port_code, country.id AS country_id, vessel_schedule.eta, vessel_schedule.etd FROM vessel_schedule INNER JOIN vessel_name ON vessel_schedule.vessel_name = vessel_name.id INNER JOIN vessel_voyage ON vessel_schedule.voyage_number = vessel_voyage.id INNER JOIN service_name ON vessel_schedule.service_name = service_name.id INNER JOIN port_name ON vessel_schedule.port_name = port_name.id INNER JOIN country ON country.id = port_name.origin_country WHERE country.id = $1';
-      pool
-        .query(scheduleQuery, originCountry)
-        .then((result) => {
-          data.schedule = result.rows;
-          const balanceAtPortQuery =
-            'SELECT loadings.vessel_name, loadings.voyage_number, loadings.pol, vessel_alloc_at_port.teu AS teu_alloc, vessel_alloc_at_port.tons AS tons_alloc, loadings.amt_of_containers, loadings.container_tonnage FROM loadings INNER JOIN vessel_alloc_at_port ON loadings.pol = vessel_alloc_at_port.port_name AND loadings.vessel_name = vessel_alloc_at_port.vessel_name WHERE vessel_alloc_at_port.country_name = $1';
-          return pool.query(balanceAtPortQuery, originCountry);
-        })
-        .then((result) => {
-          const loadData = result.rows;
-          const reduce = Array.from(
-            // take out amt_of_containers key
-            loadData
-              .reduce((acc, { amt_of_containers, container_tonnage, ...r }) => {
-                const key = JSON.stringify(r);
-                const current = acc.get(key) || {
-                  ...r,
-                  amt_of_containers: 0,
-                  container_tonnage: 0,
-                };
-                return acc.set(key, {
-                  ...current,
-                  amt_of_containers:
-                    current.amt_of_containers + amt_of_containers,
-                  container_tonnage:
-                    current.container_tonnage + container_tonnage,
-                });
-              }, new Map())
-              .values()
-          );
-          console.log(reduce);
-          data.balanceLoadings = reduce;
-          // convert db date using moment
-          Object.values(data.schedule).forEach((x) => {
-            x.eta = moment(x.eta).format('DD/MMM/YY');
-            x.etd = moment(x.etd).format('DD/MMM/YY');
-          });
-          res.render('index', { userData, data });
+        'SELECT vessel_schedule.id, vessel_name.id AS vessel_name_id ,vessel_name.vessel_name, vessel_voyage.id AS voyage_number_id, vessel_voyage.voyage_number, service_name.service_name, port_name.port_code, vessel_schedule.eta, vessel_schedule.etd, VESSEL_alloc_at_port.teu AS teu_alloc, vessel_alloc_at_port.tons AS tons_alloc, loadings.amt_of_containers, loadings.container_tonnage, country.id AS country_id FROM vessel_schedule INNER JOIN vessel_name ON vessel_schedule.vessel_name = vessel_name.id INNER JOIN vessel_voyage ON vessel_schedule.voyage_number = vessel_voyage.id INNER JOIN service_name ON vessel_schedule.service_name = service_name.id INNER JOIN port_name ON vessel_schedule.port_name = port_name.id INNER JOIN VESSEL_alloc_at_port ON vessel_schedule.port_name = vessel_alloc_at_port.port_name INNER JOIN loadings ON loadings.vessel_name = vessel_schedule.vessel_name AND loadings.vessel_name = vessel_alloc_at_port.vessel_name INNER JOIN country ON country.id = port_name.origin_country WHERE country.id = $1';
+      pool.query(scheduleQuery, originCountry).then((result) => {
+        const loadData = result.rows;
+        const reduce = Array.from(
+          // take out amt_of_containers key
+          loadData
+            .reduce((acc, { amt_of_containers, container_tonnage, ...r }) => {
+              const key = JSON.stringify(r);
+              const current = acc.get(key) || {
+                ...r,
+                amt_of_containers: 0,
+                container_tonnage: 0,
+              };
+              return acc.set(key, {
+                ...current,
+                amt_of_containers:
+                  current.amt_of_containers + amt_of_containers,
+                container_tonnage:
+                  current.container_tonnage + container_tonnage,
+              });
+            }, new Map())
+            .values()
+        );
+        // console.log(reduce);
+        data.balanceLoadings = reduce;
+        // convert db date using moment
+        Object.values(data.balanceLoadings).forEach((x) => {
+          x.eta = moment(x.eta).format('DD/MMM/YY');
+          x.etd = moment(x.etd).format('DD/MMM/YY');
         });
+        res.render('index', { userData, data });
+      });
     }
   }
 });
@@ -896,6 +896,18 @@ app.post('/schedule-creation', (req, res) => {
     'INSERT INTO vessel_schedule(vessel_name, voyage_number, service_name, port_name, eta, etd) VALUES($1, $2, $3, $4, $5, $6)';
   pool
     .query(insertQuery, input)
+    .then(() => {
+      // DOING
+      const input = [
+        req.body.vessel_name,
+        req.body.voyage_number,
+        req.body.port_code,
+      ];
+
+      const insertQuery =
+        'INSERT INTO loadings(customer_name, vessel_name, voyage_number, user_name, container_size, container_type, amt_of_containers, container_tonnage, pol, pod) VALUES(1, $1, $2, 1, 1, 1, 0, 0, $3, 1)';
+      return pool.query(insertQuery, input);
+    })
     .then(() => {
       console.log('Schedule inserted successfully.');
       res.redirect('/vessels-selection');
