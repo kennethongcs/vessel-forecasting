@@ -264,7 +264,6 @@ app.get('/vessels', (req, res) => {
 
 // GET shows admin panel
 app.get('/admin', (req, res) => {
-  // DOING
   if (req.isUserLoggedIn) {
     // verify if user has super user rights
     if (req.user.super_user) {
@@ -902,7 +901,6 @@ app.post('/schedule-creation', (req, res) => {
   pool
     .query(insertQuery, input)
     .then(() => {
-      // DOING
       const input = [
         req.body.vessel_name,
         req.body.voyage_number,
