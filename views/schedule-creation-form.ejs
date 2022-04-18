@@ -74,7 +74,10 @@
           </form>
         </div>
         <div class="col-9">
-          <table class="table-hover table-bordered mt-4 text-center">
+          <table
+            class="table-hover table-bordered mt-4 text-center"
+            style="width: 550px"
+          >
             <thead>
               <tr>
                 <th>No.</th>
@@ -84,7 +87,7 @@
                 <th>Port Code</th>
                 <th>ETA</th>
                 <th>ETD</th>
-                <th>Func</th>
+                <th>Functions</th>
               </tr>
             </thead>
             <tbody>
@@ -99,15 +102,15 @@
                 <td><%= element.etd%></td>
                 <td>
                   <form
-                    style="display: inline-block"
                     action="/schedule-creation/<%= element.id %>/edit"
+                    style="display: inline-block"
                   >
                     <input type="submit" value="Edit" />
                   </form>
                   <form
-                    style="display: inline-block"
                     action="/schedule-creation/<%= element.id %>?_method=DELETE"
                     method="POST"
+                    style="display: inline-block"
                   >
                     <input type="submit" value="Del" />
                   </form>
