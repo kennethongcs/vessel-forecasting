@@ -21,20 +21,20 @@
           </tr>
         </thead>
         <tbody>
-          <% for( let i = 0; i < data.schedule.length; i++ ) { %>
+          <% for( let i = 0; i < data.balanceLoadings.length; i++ ) { %>
           <tr>
             <td><%= i + 1 %></td>
             <td>
               <a
-                href="/loadings-creation/<%= data.schedule[i].voyage_number_id %> "
-                ><%= data.schedule[i].vessel_name %></a
+                href="/loadings-creation/<%= data.balanceLoadings[i].voyage_number_id %> "
+                ><%= data.balanceLoadings[i].vessel_name %></a
               >
             </td>
-            <td><%= data.schedule[i].voyage_number %></td>
-            <td><%= data.schedule[i].service_name %></td>
-            <td><%= data.schedule[i].port_code %></td>
-            <td><%= data.schedule[i].eta %></td>
-            <td><%= data.schedule[i].etd %></td>
+            <td><%= data.balanceLoadings[i].voyage_number %></td>
+            <td><%= data.balanceLoadings[i].service_name %></td>
+            <td><%= data.balanceLoadings[i].port_code %></td>
+            <td><%= data.balanceLoadings[i].eta %></td>
+            <td><%= data.balanceLoadings[i].etd %></td>
             <td>
               <%= data.balanceLoadings[i].teu_alloc -
               data.balanceLoadings[i].amt_of_containers %>
