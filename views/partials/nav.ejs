@@ -10,10 +10,11 @@
 
     <div class="mr-auto"></div>
     <ul class="navbar-nav">
+      <% if (user) { %>
       <li class="nav-item">
         <a class="nav-link" href="/customer-list">Customer List</a>
       </li>
-      <% if (user) { %> <% if (user.super_user) { %>
+      <% } %> <% if (user) { %> <% if (user.super_user) { %>
 
       <li class="nav-item">
         <a class="nav-link" href="/admin">Admin</a>
