@@ -264,12 +264,17 @@ app.get('/vessels', (req, res) => {
 
 // GET shows admin panel
 app.get('/admin', (req, res) => {
-  // verify if user has super user rights
-  if (req.user.super_user) {
-    // show admin ejs
-    res.render('admin');
+  // DOING
+  if (req.isUserLoggedIn) {
+    // verify if user has super user rights
+    if (req.user.super_user) {
+      // show admin ejs
+      res.render('admin');
+    } else {
+      res.redirect('/');
+    }
   } else {
-    res.redirect('/');
+    res.redirect('/login');
   }
 });
 
@@ -1135,7 +1140,7 @@ app.get('/loadings-creation/:id', (req, res) => {
             .send('Server error. Please check with administrator.');
         });
     } else {
-      // if not admin but logged in DOING
+      // if not admin but logged in
       const data = {};
       const insert = [req.params.id];
       const scheduleQuery =
@@ -1145,7 +1150,6 @@ app.get('/loadings-creation/:id', (req, res) => {
         .then((result) => {
           data.scheduleData = result.rows[0];
           if (req.user.origin_country !== data.scheduleData.origin_country) {
-            // BUG
             res.redirect('/');
             // return
           }
@@ -1193,7 +1197,7 @@ app.get('/loadings-creation/:id', (req, res) => {
   }
 });
 app.post('/loadings-creation', (req, res) => {
-  // input into loading_
+  // input into loading
   const input = [
     req.body.customer_name,
     req.body.vessel_name,
