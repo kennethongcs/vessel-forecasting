@@ -146,7 +146,6 @@ app.get('/', (req, res) => {
         data.balanceLoadings.sort((a, b) => {
           return b.daysRemaining - a.daysRemaining;
         });
-
         // console.log(data.balanceLoadings);
         res.render('index', { userData, data });
       });
@@ -180,10 +179,25 @@ app.get('/', (req, res) => {
         );
         // console.log(reduce);
         data.balanceLoadings = reduce;
+        // find remaining days based on current date and eta date
+        Object.values(data.balanceLoadings).forEach((x) => {
+          // convert eta date to moment object
+          const etaDate = moment(x.eta);
+          // get current date in moment object
+          const todaysDate = moment().startOf('day');
+          // subtract today from eta to find remaining days till eta
+          const add = etaDate.diff(todaysDate, 'days');
+          // add remaining days into object
+          x.daysRemaining = add;
+        });
         // convert db date using moment
         Object.values(data.balanceLoadings).forEach((x) => {
-          x.eta = moment(x.eta).format('DD/MMM/YY');
-          x.etd = moment(x.etd).format('DD/MMM/YY');
+          x.eta = moment(x.eta).format('DD/MM/YYYY');
+          x.etd = moment(x.etd).format('DD/MM/YYYY');
+        });
+        // sort based on days left till eta
+        data.balanceLoadings.sort((a, b) => {
+          return b.daysRemaining - a.daysRemaining;
         });
         res.render('index', { userData, data });
       });
