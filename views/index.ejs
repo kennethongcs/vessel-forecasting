@@ -5,13 +5,15 @@
     <main class="container-fluid mt-4">
       <!-- DOING -->
       <div
-        class="alert alert-success alert-dismissible mx-auto fade show"
-        style="max-width: 500px"
+        class="alert alert-danger alert-dismissible mx-auto fade show d-none"
+        id="popout"
+        style="max-width: 610px"
       >
         <button type="button" class="close" data-dismiss="alert">
           &times;
         </button>
-        <strong>Success!</strong> Indicates a successful or positive action.
+        You have vessels that are <strong>< 7</strong> days to ETA at port of
+        load that are <strong>not full</strong>.
       </div>
       <table
         class="table-hover table-index mt-4 text-center mx-auto"
@@ -52,11 +54,11 @@
             <% if (data.balanceLoadings[i].teu_alloc -
             data.balanceLoadings[i].amt_of_containers > 0 &&
             data.balanceLoadings[i].daysRemaining <= 7) { %>
-            <td class="text-danger">
+            <td class="text-danger teu">
               <%= data.balanceLoadings[i].teu_alloc -
               data.balanceLoadings[i].amt_of_containers %>
             </td>
-            <td class="text-danger">
+            <td class="text-danger ton">
               <%= data.balanceLoadings[i].tons_alloc -
               data.balanceLoadings[i].container_tonnage %>
             </td>
@@ -70,7 +72,7 @@
               data.balanceLoadings[i].container_tonnage %>
             </td>
             <% } %> <% if (data.balanceLoadings[i].daysRemaining <= 7) { %>
-            <td class="text-danger font-weight-bold">
+            <td class="text-danger font-weight-bold late">
               <%= data.balanceLoadings[i].daysRemaining %>
             </td>
             <% } else { %>
@@ -81,5 +83,13 @@
         </tbody>
       </table>
     </main>
+    <script>
+      const overdue = document.querySelectorAll('.late');
+      const lowTEU = document.querySelectorAll('.teu');
+      const lowTON = document.querySelectorAll('.ton');
+      if (overdue.length > 0 && (lowTEU.length > 0 || lowTON.length > 0)) {
+        document.querySelector('#popout').classList.add('d-block');
+      }
+    </script>
   </body>
 </html>
