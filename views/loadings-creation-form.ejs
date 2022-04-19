@@ -121,8 +121,9 @@
           </form>
         </div>
         <div class="col-8">
+          <p class="mb-1">Total Loadings on vessel:</p>
           <table
-            class="table-hover table-bordered mt-4 text-center"
+            class="table-hover table-bordered mt-2 text-center"
             style="min-width: 400px"
           >
             <thead>
@@ -130,7 +131,7 @@
                 <th>Cust</th>
                 <th>Size</th>
                 <th>Type</th>
-                <th>Amt</th>
+                <th>TEU</th>
                 <th>Ton</th>
                 <th>POD</th>
               </tr>
@@ -141,15 +142,31 @@
                 <td><%= element.op_code %></td>
                 <td><%= element.size %></td>
                 <td><%= element.type %></td>
-                <td><%= element.amt_of_containers %></td>
-                <td><%= element.container_tonnage %></td>
+                <td class="containers"><%= element.amt_of_containers %></td>
+                <td class="tonnage"><%= element.container_tonnage %></td>
                 <td><%= element.pod %></td>
               </tr>
               <% }) %>
             </tbody>
           </table>
+          <p class="amount"></p>
         </div>
       </div>
     </main>
+    <script>
+      const containers = document.querySelectorAll('.containers');
+      const tonnage = document.querySelectorAll('.tonnage');
+      let sumOfContainers = 0;
+      let sumOfTonnage = 0;
+      for (let i = 0; i < containers.length; i += 1) {
+        sumOfContainers += Number(containers[i].textContent);
+      }
+      for (let i = 0; i < tonnage.length; i += 1) {
+        sumOfTonnage += Number(tonnage[i].textContent);
+      }
+      document.querySelector(
+        '.amount'
+      ).textContent = `Total -- Teus: ${sumOfContainers} / Tons: ${sumOfTonnage}`;
+    </script>
   </body>
 </html>
