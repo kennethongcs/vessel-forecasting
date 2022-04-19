@@ -3,9 +3,19 @@
   <%- include('partials/header', {title: 'Welcome'}) %>
   <body>
     <main class="container-fluid mt-4">
+      <!-- DOING -->
+      <div
+        class="alert alert-success alert-dismissible mx-auto fade show"
+        style="max-width: 500px"
+      >
+        <button type="button" class="close" data-dismiss="alert">
+          &times;
+        </button>
+        <strong>Success!</strong> Indicates a successful or positive action.
+      </div>
       <table
         class="table-hover table-index mt-4 text-center mx-auto"
-        style="width: 720px"
+        style="width: 740px"
       >
         <thead>
           <tr>
@@ -13,15 +23,19 @@
             <th>Vessel</th>
             <th>Voyage</th>
             <th>Service</th>
-            <th>Port Code</th>
+            <th>POL</th>
             <th>ETA</th>
             <th>ETD</th>
             <th>Bal. TEU</th>
             <th>Bal. Tons</th>
+            <th>Days Left</th>
           </tr>
         </thead>
         <tbody>
           <% for( let i = 0; i < data.balanceLoadings.length; i++ ) { %>
+          <!-- if days remaining < 0 then hide row -->
+          <% if (data.balanceLoadings[i].daysRemaining < 0) { %> <%=
+          data.balanceLoadings[i].hidden %> <% } else { %>
           <tr>
             <td><%= i + 1 %></td>
             <td>
@@ -35,6 +49,18 @@
             <td><%= data.balanceLoadings[i].port_code %></td>
             <td><%= data.balanceLoadings[i].eta %></td>
             <td><%= data.balanceLoadings[i].etd %></td>
+            <% if (data.balanceLoadings[i].teu_alloc -
+            data.balanceLoadings[i].amt_of_containers > 0 &&
+            data.balanceLoadings[i].daysRemaining <= 7) { %>
+            <td class="text-danger">
+              <%= data.balanceLoadings[i].teu_alloc -
+              data.balanceLoadings[i].amt_of_containers %>
+            </td>
+            <td class="text-danger">
+              <%= data.balanceLoadings[i].tons_alloc -
+              data.balanceLoadings[i].container_tonnage %>
+            </td>
+            <% } else { %>
             <td>
               <%= data.balanceLoadings[i].teu_alloc -
               data.balanceLoadings[i].amt_of_containers %>
@@ -43,8 +69,15 @@
               <%= data.balanceLoadings[i].tons_alloc -
               data.balanceLoadings[i].container_tonnage %>
             </td>
+            <% } %> <% if (data.balanceLoadings[i].daysRemaining <= 7) { %>
+            <td class="text-danger font-weight-bold">
+              <%= data.balanceLoadings[i].daysRemaining %>
+            </td>
+            <% } else { %>
+            <td><%= data.balanceLoadings[i].daysRemaining %></td>
+            <% } %>
           </tr>
-          <% } %>
+          <% } %> <% } %>
         </tbody>
       </table>
     </main>
