@@ -1240,3 +1240,52 @@ app.post('/loadings-creation', (req, res) => {
       res.status(500).send('Server error. Please check with administrator.');
     });
 });
+// DOING
+app.get('/loadings-creation/:id/edit', (req, res) => {
+  const { id } = req.params;
+  const input = [id];
+  const data = {};
+  const loadingsEditQuery =
+    'SELECT loadings.id, loadings.customer_name AS customer_id, customers.op_code, loadings.container_size, container_sizes.size, loadings.container_type, container_types.type, loadings.amt_of_containers, loadings.container_tonnage, port_name.id AS pol_id, port_name.port_code AS pol, loadings.pod AS pod_id, port_name1.port_code AS pod FROM loadings INNER JOIN customers ON loadings.customer_name = customers.id INNER JOIN container_sizes ON loadings.container_size = container_sizes.id INNER JOIN container_types ON loadings.container_type = container_types.id INNER JOIN port_name ON port_name.id = loadings.pol INNER JOIN port_name AS port_name1 ON loadings.pod = port_name1.id WHERE loadings.id=$1';
+  pool
+    .query(loadingsEditQuery, input)
+    .then((result) => {
+      data.loadings = result.rows[0];
+      const customerListQuery = 'SELECT * FROM customers';
+      return pool.query(customerListQuery);
+    })
+    .then((result) => {
+      data.customerData = result.rows;
+      const containerSizes = 'SELECT * FROM container_sizes';
+      return pool.query(containerSizes);
+    })
+    .then((result) => {
+      data.containerSizes = result.rows;
+      const containerTypes = 'SELECT * FROM container_types';
+      return pool.query(containerTypes);
+    })
+    .then((result) => {
+      data.containerTypes = result.rows;
+      const portList = 'SELECT * FROM port_name';
+      return pool.query(portList);
+    })
+    .then((result) => {
+      data.portNames = result.rows;
+      console.log(data);
+      res.render('loadings-creation-edit', { data });
+    })
+    .catch((err) => {
+      console.log('Loadings edit error: ', err);
+      res.status(500).send('Server error. Please check with administrator.');
+    });
+});
+app.put('/loadings-creation/:id/', (req, res) => {
+  const { id } = req.params;
+  console.log(
+    req.body.customer_name,
+    req.body.container_size,
+    req.body.container_type,
+    req.body.pol,
+    req.body.pod
+  );
+});
