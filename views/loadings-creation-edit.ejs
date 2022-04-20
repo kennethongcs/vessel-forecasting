@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+  <%- include('partials/header', {title: 'Loadings Edit Form'}) %>
+  <body>
+    <main class="container mt-4">
+      <form
+        action="/loadings-creation/<%= data.loadings.id %>?_method=PUT"
+        method="POST"
+      >
+        <div class="form-group">
+          <label for="customer_name">Customer Name:</label>
+          <select name="customer_name" id="customer_name" class="form-control">
+            <option value="<%= data.loadings.customer_id %> " selected hidden>
+              <%= data.loadings.op_code %>
+            </option>
+            <% data.customerData.forEach(x => { %>
+            <option value="<%= x.id %>"><%= x.op_code %></option>
+            <% }) %>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="container_size">Container Size:</label>
+          <select
+            name="container_size"
+            id="container_size"
+            class="form-control"
+          >
+            <option value="<%= data.loadings.container_size %>" selected hidden>
+              <%= data.loadings.size %>
+            </option>
+            <% data.containerSizes.forEach(x => { %>
+            <option value="<%= x.id %>"><%= x.size %></option>
+            <% }) %>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="container_type">Container Type:</label>
+          <select
+            name="container_type"
+            id="container_type"
+            class="form-control"
+          >
+            <option value="<%= data.loadings.container_type %>" selected hidden>
+              <%= data.loadings.type %>
+            </option>
+            <%= data.loadings.type %> <% data.containerTypes.forEach(x => { %>
+            <option value="<%= x.id %>"><%= x.type %></option>
+            <% }) %>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="pol">POL:</label>
+          <input
+            type="text"
+            name="pol"
+            id="pol"
+            value="<%= data.loadings.pol_id %>"
+            hidden
+          />
+          <input
+            class="form-control"
+            value="<%= data.loadings.pol %>"
+            readonly="readonly"
+          />
+        </div>
+        <div class="form-group">
+          <label for="pod">POD:</label>
+          <select name="pod" id="pod" class="form-control">
+            <option value="<%= data.loadings.pod_id %>" hidden selected>
+              <%= data.loadings.pod %>
+            </option>
+          </select>
+        </div>
+        <!-- submit button -->
+        <input type="submit" value="Submit" class="btn btn-success" />
+      </form>
+    </main>
+  </body>
+</html>
