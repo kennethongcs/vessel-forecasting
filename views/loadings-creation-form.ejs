@@ -134,6 +134,7 @@
                 <th>TEU</th>
                 <th>Ton</th>
                 <th>POD</th>
+                <th>Functions</th>
               </tr>
             </thead>
             <tbody>
@@ -145,6 +146,21 @@
                 <td class="containers"><%= element.amt_of_containers %></td>
                 <td class="tonnage"><%= element.container_tonnage %></td>
                 <td><%= element.pod %></td>
+                <td>
+                  <form
+                    action="/loadings-creation/<%= element.id %>/edit"
+                    style="display: inline-block"
+                  >
+                    <input type="submit" value="Edit" />
+                  </form>
+                  <form
+                    action="/loadings-creation/<%= element.id %>?_method=DELETE"
+                    method="POST"
+                    style="display: inline-block"
+                  >
+                    <input type="submit" value="Del" />
+                  </form>
+                </td>
               </tr>
               <% }) %>
             </tbody>
