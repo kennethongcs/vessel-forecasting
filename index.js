@@ -144,7 +144,7 @@ app.get('/', (req, res) => {
         });
         // sort based on days left till eta
         data.balanceLoadings.sort((a, b) => {
-          return b.daysRemaining - a.daysRemaining;
+          return a.daysRemaining - b.daysRemaining;
         });
         // console.log(data.balanceLoadings);
         res.render('index', { userData, data });
