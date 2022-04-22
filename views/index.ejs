@@ -22,16 +22,62 @@
       >
         <thead>
           <tr>
-            <th>No.</th>
-            <th>Vessel</th>
-            <th>Voyage</th>
-            <th>Service</th>
-            <th>POL</th>
-            <th>ETA</th>
-            <th>ETD</th>
-            <th>Bal. TEU</th>
-            <th>Bal. Tons</th>
-            <th>Days Left</th>
+            <th data-toggle="tooltip" data-placement="top" title="No.">No.</th>
+            <th data-toggle="tooltip" data-placement="top" title="Vessel Name">
+              Vessel
+            </th>
+            <th
+              data-toggle="tooltip"
+              data-placement="top"
+              title="Vessel Voyage Number"
+            >
+              Voyage
+            </th>
+            <th
+              data-toggle="tooltip"
+              data-placement="top"
+              title="Service Vessel is On"
+            >
+              Service
+            </th>
+            <th data-toggle="tooltip" data-placement="top" title="Port of Load">
+              POL
+            </th>
+            <th
+              data-toggle="tooltip"
+              data-placement="top"
+              title="Est. Time Arrival at POL"
+            >
+              ETA
+            </th>
+            <th
+              data-toggle="tooltip"
+              data-placement="top"
+              title="Est. Time Depart at POL"
+            >
+              ETD
+            </th>
+            <th
+              data-toggle="tooltip"
+              data-placement="top"
+              title="Balance Container Space"
+            >
+              Bal. TEU
+            </th>
+            <th
+              data-toggle="tooltip"
+              data-placement="top"
+              title="Balance Tonnage Available"
+            >
+              Bal. Tons
+            </th>
+            <th
+              data-toggle="tooltip"
+              data-placement="top"
+              title="Days Left Till ETA"
+            >
+              Days Left
+            </th>
           </tr>
         </thead>
         <tbody>
@@ -93,4 +139,8 @@
       }
     </script>
   </body>
+  <script>
+    // init tooltips
+    $('[data-toggle="tooltip"]').tooltip();
+  </script>
 </html>
