@@ -32,6 +32,9 @@ Userflow: https://github.com/kennethongcs/base-node-bootcamp/blob/vessel-forecas
 
 Wireframe:
 
+1. Index page (after login): https://github.com/kennethongcs/base-node-bootcamp/blob/vessel-forecasting/wireframe/homepage(after%20login).png
+2. Login page: https://github.com/kennethongcs/base-node-bootcamp/blob/vessel-forecasting/wireframe/Login.png
+
 Homepage (without login): https://github.com/kennethongcs/base-node-bootcamp/blob/vessel-forecasting/wireframe/Homepage.png
 
 Login: https://github.com/kennethongcs/base-node-bootcamp/blob/vessel-forecasting/wireframe/Login.png
