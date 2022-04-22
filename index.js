@@ -84,6 +84,9 @@ app.listen(port, () => {
 // index //
 ///////////
 
+/**
+ * Routes for the index page
+ */
 app.get('/', (req, res) => {
   // if user is not logged in redirect to login page
   if (!req.isUserLoggedIn) {
@@ -100,6 +103,7 @@ app.get('/', (req, res) => {
       const data = result.rows;
       vesselAllocation = { data };
     });
+    // if user is a super user cont below
     if (req.user.super_user) {
       const scheduleQuery =
         'SELECT vessel_schedule.id, vessel_name.id AS vessel_name_id ,vessel_name.vessel_name, vessel_voyage.id AS voyage_number_id, vessel_voyage.voyage_number, service_name.service_name, port_name.port_code, vessel_schedule.eta, vessel_schedule.etd, VESSEL_alloc_at_port.teu AS teu_alloc, vessel_alloc_at_port.tons AS tons_alloc, loadings.amt_of_containers, loadings.container_tonnage FROM vessel_schedule INNER JOIN vessel_name ON vessel_schedule.vessel_name = vessel_name.id INNER JOIN vessel_voyage ON vessel_schedule.voyage_number = vessel_voyage.id INNER JOIN service_name ON vessel_schedule.service_name = service_name.id INNER JOIN port_name ON vessel_schedule.port_name = port_name.id INNER JOIN VESSEL_alloc_at_port ON vessel_schedule.port_name = vessel_alloc_at_port.port_name INNER JOIN loadings ON loadings.vessel_name = vessel_schedule.vessel_name AND loadings.vessel_name = vessel_alloc_at_port.vessel_name';
@@ -209,7 +213,6 @@ app.get('/', (req, res) => {
 app.get('/login', (req, res) => {
   // if user already logged in, redirect to index '/'
   res.render('loginForm');
-  // TODO
   // if not logged in then show this page, else don't show login button and redirect from login page
 });
 
@@ -327,8 +330,7 @@ app.get('/voyage-creation', (req, res) => {
     res.redirect('/');
   }
 });
-// POST for vessel-voyage-creation form
-// adds new voyage into DB
+// adds new voyage into database
 app.post('/voyage-creation', (req, res) => {
   // retrieve data from form input
   const data = req.body;
@@ -349,8 +351,6 @@ app.post('/voyage-creation', (req, res) => {
       res.status(500).send('Server error. Please check with administrator.');
     });
 });
-// GET for vessel-voyage-creation
-// edit voyage
 app.get('/voyage-creation/:id/edit', (req, res) => {
   if (req.user.super_user) {
     const { id } = req.params;
@@ -371,7 +371,6 @@ app.get('/voyage-creation/:id/edit', (req, res) => {
     res.redirect('/');
   }
 });
-// PUT for vessel-voyage-creation
 app.put('/voyage-creation/:id/', (req, res) => {
   const { id } = req.params;
   const input = [req.body.voyage_number, id];
@@ -391,7 +390,6 @@ app.put('/voyage-creation/:id/', (req, res) => {
       res.status(500).send('Server error. Please check with administrator.');
     });
 });
-// DEL for vessel-voyage-creation
 app.delete('/voyage-creation/:id', (req, res) => {
   const { id } = req.params;
   const input = [id];
@@ -411,7 +409,7 @@ app.delete('/voyage-creation/:id', (req, res) => {
 ////////////
 // vessel //
 ////////////
-
+// shows form to create new vessels
 app.get('/vessel-creation', (req, res) => {
   // check if admin
   if (req.user.super_user) {
@@ -506,10 +504,12 @@ app.delete('/vessel-creation/:id', (req, res) => {
 //////////
 // port //
 //////////
+// shows form to create new ports
 app.get('/port-creation', (req, res) => {
   // check if admin
   if (req.user.super_user) {
-    const portQuery = 'SELECT * FROM port_name';
+    const portQuery =
+      'SELECT port_name.id, port_name.port_name, port_name.port_code, port_name.origin_country, country.country_name FROM port_name INNER JOIN country ON port_name.origin_country = country.id';
     pool
       .query(portQuery)
       .then((result) => {
@@ -545,7 +545,8 @@ app.post('/port-creation', (req, res) => {
 app.get('/port-creation/:id/edit', (req, res) => {
   const { id } = req.params;
   const input = [id];
-  const portEditQuery = 'SELECT * FROM port_name WHERE id=$1';
+  const portEditQuery =
+    'SELECT port_name.id, port_name.port_name, port_name.port_code, port_name.origin_country, country.country_name FROM port_name INNER JOIN country ON port_name.origin_country = country.id WHERE port_name.id=$1';
   pool
     .query(portEditQuery, input)
     .then((result) => {
@@ -596,6 +597,7 @@ app.delete('/port-creation/:id', (req, res) => {
 /////////////
 // service //
 /////////////
+// shows form to create new service
 app.get('/service-creation', (req, res) => {
   // check if admin
   if (req.user.super_user) {
@@ -683,6 +685,7 @@ app.delete('/service-creation/:id', (req, res) => {
 ////////////////
 // allocation //
 ////////////////
+// shows form to create new allocation for vessel at port
 app.get('/allocation-creation', (req, res) => {
   // check if admin
   if (req.user.super_user) {
@@ -831,7 +834,7 @@ app.delete('/allocation-creation/:id', (req, res) => {
 //////////////
 // schedule //
 //////////////
-// GET shows available vessels
+// shows available vessels
 app.get('/vessels-selection', (req, res) => {
   // check if user is logged in
   if (req.isUserLoggedIn) {
@@ -993,7 +996,7 @@ app.delete('/schedule-creation/:id', (req, res) => {
 //////////////
 // customer //
 //////////////
-// for user to view
+// for non-super-user to view (must be logged in)
 app.get('/customer-list', (req, res) => {
   if (req.isUserLoggedIn) {
     const customerQuery = 'SELECT * FROM customers';
@@ -1101,6 +1104,7 @@ app.delete('/customer-creation/:id', (req, res) => {
 //////////////
 // Loadings //
 //////////////
+// shows form for to create new loadings for selected vessels
 app.get('/loadings-creation/:id', (req, res) => {
   if (req.isUserLoggedIn) {
     const userData = req.user;
@@ -1240,7 +1244,6 @@ app.post('/loadings-creation', (req, res) => {
       res.status(500).send('Server error. Please check with administrator.');
     });
 });
-// DOING
 app.get('/loadings-creation/:id/edit', (req, res) => {
   const { id } = req.params;
   const input = [id];
@@ -1288,4 +1291,19 @@ app.put('/loadings-creation/:id/', (req, res) => {
     req.body.pol,
     req.body.pod
   );
+});
+app.delete('/loadings-creation/:id', (req, res) => {
+  const { id } = req.params;
+  const input = [id];
+  const deleteQuery = 'DELETE FROM loadings WHERE id=$1';
+  pool
+    .query(deleteQuery, input)
+    .then(() => {
+      console.log('Loadings deleted successfully.');
+      res.redirect('/');
+    })
+    .catch((err) => {
+      console.log('Error: ', err);
+      res.status(500).send('Server error. Please check with administrator.');
+    });
 });
