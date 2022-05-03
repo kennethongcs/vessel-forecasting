@@ -1,6 +1,6 @@
 # Vessel Forecasting
 
-Video link: https://youtu.be/qI7d_-VsyHU
+Demo Video link: https://youtu.be/qI7d_-VsyHU
 
 Needs/Goals:
 
